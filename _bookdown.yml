@@ -1,0 +1,14 @@
+book_filename: "tesi"
+output_dir: "output"
+delete_merged_file: true
+language:
+  label:
+    fig: 'Figura '
+    tab: 'Tabella '
+  ui:
+    chapter_name: " "
+
+opts_chunk:
+  dev: "pdf"
+  fig.ext: "pdf"
+

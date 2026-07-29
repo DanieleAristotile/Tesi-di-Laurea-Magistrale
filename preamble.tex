@@ -1,0 +1,47 @@
+\usepackage{booktabs}
+\usepackage{amsmath}
+\usepackage{amsthm}
+%\usepackage[T1]{fontenc}
+%\usepackage[utf8]{inputenc}
+\usepackage{microtype}
+\usepackage{multicol}
+\usepackage{xcolor}
+\usepackage{fontspec}
+\usepackage{float}
+%\setmainfont{Arial} % possibile opzione
+\setmainfont{Palatino} % per Mac
+%\setmainfont{Palatino Linotype} % per Windows
+
+\usepackage{graphicx}
+\usepackage{geometry}
+\usepackage{hyperref}
+\usepackage{setspace}
+%\onehalfspacing
+\singlespacing
+
+\makeatletter
+\def\thm@space@setup{%
+  \thm@preskip=8pt plus 2pt minus 4pt
+  \thm@postskip=\thm@preskip
+}
+\makeatother
+
+\addto\captionsitalian{%
+  \renewcommand{\chaptername}{}%
+}
+
+\usepackage{titlesec}
+\titleformat{\chapter}[hang]{\huge\bfseries}{\thechapter\quad}{0pt}{}
+
+
+
+% Colore istituzionale Sapienza
+\definecolor{sapred}{rgb}{0.5098039,0.1411765,0.2}
+
+\hypersetup{
+  colorlinks=true,
+  linkcolor=sapred,
+  urlcolor=sapred,
+  pdftitle={Titolo della tesi},
+  pdfauthor={Nome Cognome}
+}

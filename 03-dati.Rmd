@@ -1,0 +1,19 @@
+# Descrizione dati {#ch3}
+
+All chapters start with a first-level heading followed by your chapter title, like the line above. There should be only one first-level heading (`#`) per .Rmd file.
+
+## Sezione dati
+
+All chapter sections start wi
+th a second-level (`##`) or higher heading followed by your section title, like the sections above and below here. You can have as many as you want within a chapter.
+
+```{r}
+data <- read.csv("dataset.csv", header=TRUE)
+plot(data$TS1)
+```
+
+
+### Sottosezione dati
+
+Chapters and sections are numbered by default. To un-number a heading, add a `{.unnumbered}` or the shorter `{-}` at the end of the heading, like in this section.
+

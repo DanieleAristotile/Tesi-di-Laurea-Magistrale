@@ -1,0 +1,20 @@
+# Metodi {#ch2}
+
+
+Sia dato il seguente processo stocastico
+$$ X_t = 0.8X_{t-1}  - 0.4X_{t-2} + e_t - 0.1 e_{t-1} \quad \text{con} \quad e_t \sim WNG(0, \sigma^2_e)$$
+
+
+## Sezione metodi
+
+$\begin{aligned}
+\gamma(0)&=E(X_t - \mu)^2 = E(e_t+\theta e_{t-1})^2\\
+&=E(e_t^2 + 2\theta e_t e_{t-1} + \theta^2 e_{t-1}^2)\\
+&=\sigma^2_e + 0 + \theta^2\sigma^2_e\\
+&=(1+\theta^2)\sigma^2_e
+\end{aligned}$
+
+
+### Sottosezione metodi
+
+Chapters and sections are numbered by default. To un-number a heading, add a `{.unnumbered}` or the shorter `{-}` at the end of the heading, like in this section.

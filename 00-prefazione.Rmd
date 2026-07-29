@@ -1,0 +1,9 @@
+# Prefazione {-}
+
+Breve testo introduttivo (max 1 pag) personale e riflessivo, posto prima dell’introduzione scientifica per:
+
+* spiegare le motivazioni che hanno portato alla scelta dell’argomento
+
+* raccontare come è stato sviluppato il lavoro (contesto, esperienze, difficoltà)
+
+* ringraziamenti

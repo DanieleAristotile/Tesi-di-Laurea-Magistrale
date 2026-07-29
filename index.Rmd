@@ -1,0 +1,50 @@
+--- 
+title: ""
+author: ""
+site: bookdown::bookdown_site
+documentclass: book
+classoption: 11pt
+output:
+  bookdown::gitbook:
+    css: style.css
+  bookdown::pdf_book:
+    includes:
+      in_header: preamble.tex
+      before_body: frontespizio.tex
+bibliography: [biblio.bib]
+biblio-style: apa
+link-citations: yes
+lang: it
+---
+
+```{r setup, include=FALSE}
+# NON MODIFICARE QUESTO CHUNK
+# Imposta dove salvare le figure PDF
+knitr::opts_chunk$set(
+  dev = "pdf",
+  fig.ext = "pdf",
+  fig.path = "tesi_files/figure-latex/",
+  echo = TRUE, 
+  fig.align = "center", 
+  warning=FALSE, 
+  message = FALSE,
+  fig.pos = "H", 
+  out.extra = ""
+  )
+
+# Trasferisce il logoSapienza nella root del .tex
+logo_src <- "logoSapienza.png"
+logo_dest <- file.path("output", logo_src)
+
+if (file.exists(logo_src) && !file.exists(logo_dest)) {
+  file.copy(logo_src, logo_dest, overwrite = TRUE)
+}
+```
+
+
+
+
+
+
+
+
