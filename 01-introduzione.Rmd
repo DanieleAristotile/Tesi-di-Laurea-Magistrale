@@ -1,13 +1,371 @@
 # Introduzione {#ch1}
-\pagenumbering{arabic}
-\setcounter{page}{1}
 
-All chapters start with a first-level heading followed by your chapter title, like the line above. There should be only one first-level heading (`#`) per .Rmd file.
+## Il contesto storico delle piattaforme streaming
 
-## Sezione Intro 
 
-All chapter sections start with a second-level (`##`) or higher heading followed by your section title, like the sections above and below here. You can have as many as you want within a chapter @xie2015.
+È ormai da diversi anni che si assiste ad un profondo cambiamento riguardante l’identità del cinema e della serialità televisiva globale dal punto di vista economico, creativo e sociale. La causa di questo cambiamento è dovuta all’introduzione di un fenomeno *disruptive* che affonda le sue radici in una più ampia rivoluzione, quella digitale, che oggigiorno riguarda non solo il mercato dell’audiovisivo, ma la vita quotidiana di ognuno di noi. L’avvento del digitale ha creato nuove imprese e nuovi modelli di business, come ad esempio la nascita e lo sviluppo della “piattaforma” come modello organizzativo. La piattaforma è una tipologia di attività basata sull’abilitazione di interazioni che creano valore tra produttori esterni e consumatori, il cui scopo generale consiste nel favorire l’incontro tra gli utenti e facilitare lo scambio di beni, servizi o valore sociale, consentendo in tal modo la creazione di valore per tutti i partecipanti (Parker et al. 2016). Verso la fine degli anni 90 Reed Hastings e Marc Randolph fondarono Netflix. Concepito inizialmente come un servizio di noleggio DVD via posta, nel 1999 fu introdotto un modello innovativo di business costituito da un abbonamento mensile che permetteva ai clienti di noleggiare un numero illimitato di DVD, strategia che ha permesso alla società di distinguersi dalla concorrenza, in particolare da Blockbuster, all'epoca il gigante indiscusso del noleggio di film. Nel 2002 la società debuttò in Borsa, e nel gennaio 2007 lanciò il servizio di streaming video, segnando il vero punto di svolta. Nel 2010 fu presa la decisione di espandersi a livello globale, e in soli quattro anni arrivò a toccare oltre 190 paesi. Questa crescita ha generato uno shock strutturale nel mercato coinvolgendo un po’ tutti i soggetti operanti, dalle sale cinematografiche (a causa di spettatori divenuti “impazienti e inaffidabili”, attratti dalla cosiddetta “Stay-at-Home Economy”) alle case di produzioni che hanno visto la crescita di un potenziale competitor avente grossi capitale da investire nel settore. AMC Entertainment Holdings, Inc., la catena di sale cinematografiche più grande al mondo, detenente una quota di mercato che si attesta attorno al 10%, sebbene abbia visto il numero di spettatori presente nelle sale anno per anno sempre in aumento, fu costretta a cambiare modello di business. Il prezzo medio del biglietto nelle sale aumentò del 14,02%, passando da 8,13\$ nel 2012 a 9,27\$ l’anno successivo, il che le permise di adottare un processo di ristrutturazione che comportava generalmente una perdita del 64% della capacità di posti a sedere al fine di migliorare la qualità dell’esperienza degli spettatori, provandoli ad attirare sempre più nelle sale. Questo cambiamento, come recita il report annuale del 2013 della società di AMC sotto la sezione Risk Factors, era dovuto in gran parte ad un aumento della popolarità di questi metodi alternativi di distribuzione dei film e di altre forme di intrattenimento che avrebbero potuto ridurre l'affluenza nei cinema e influenzare negativamente il business e i risultati operativi. il COVID-19 (2020), in seguito, ha stagnato e rallentato lo sviluppo di tutti i tipi di industrie e settori, compresa l'industria cinematografica. Le sale cinematografiche e le società di produzione cinematografica hanno subito ingenti perdite di ricavi. Prima dell'inizio dell'epidemia, ad esempio, il mercato cinematografico cinese si stava sviluppando rapidamente: nei primi anni 2010, il numero di schermi cinematografici nel paese aveva superato addirittura quello degli Stati Uniti; tuttavia, il pubblico ha smesso di andare al cinema per paura della diffusione del virus e, di conseguenza, tutti i progetti cinematografici sono stati interrotti. Ciò che ne è seguito è stata la chiusura delle sale cinematografiche in tutto il mondo e la sospensione delle attività dell'industria cinematografica. Nel 2023 non c’è stato più il lockdown, la vita delle persone ha cominciato a riprendere più o meno regolarmente. Con il boom dello streaming durante la pandemia e le sale cinematografiche chiuse, però, il cinema ha incontrato notevoli difficoltà nel riprendersi. Ciò che conta oggi per i cinema sono i blockbuster. L'hype intorno ai blockbuster attira ancora le persone al cinema – da qui la strategia della "blockbusterizzazione". Negli ultimi due decenni, i cinema hanno risposto a questo declino strutturale con grandi aumenti di prezzo (AMC ora chiede 18,49 dollari a biglietto per un adulto) aggiornando le proprie sale con grandi sedie comode – come le "poltrone reclinabili AMC signature" – e in alcuni posti offrono vero cibo, birra e vino, cercando di creare un'atmosfera di "esperienza", anche se, nonostante ciò, le vendite dei biglietti sono continuate a crollare negli anni. L’industria cinematografica ha subito notevoli cambiamenti anche in termini di produzione cinematografica. Infatti, già nel periodo pre-COVID-19 le piattaforme streaming hanno deciso di dedicarsi, invece che solamente all’acquisto di prodotti come film e serie Tv, anche alla loro produzione, rendendoli dunque prodotti propri, ampliando il numero di contenuti disponibili. Sebbene Netflix prima e Amazon Prime poi attuarono questa strategia appunto di ampliamento dei contenuti, sia tramite prodotti di produzione propria che tramite l’acquisizione di prodotti altrui, molte case di produzione, già a partire dal 2017 decisero di staccarsi dalle cosiddette SVOD (Subscription Video On Demand) e crearne delle nuove di proprietà attraverso cui ottenere una fetta più grande della torta dello streaming. La prima grande società di produzione a adottare questa strategia fu Disney, che nel 2017 per l’appunto, nel suo ultimo rapporto sugli utili annunciò la decisione di esercitare un'opzione per spostare i suoi contenuti fuori dalla piattaforma Netflix, poiché nel 2019 la società avrebbe dichiarato il lancio della propria piattaforma streaming rinunciando ai ricavi da licenze derivanti dalla vendita di contenuti a terzi nei mercati TV/SVOD. Christine McCarthy, CFO di Walt Disney, dichiarò in merito alla strategia di Walled Garden (ovvero ritirare i propri contenuti da Netflix per usarli come esclusiva sulla propria piattaforma) che l’offerta si sarebbe rafforzata ulteriormente nel tempo man mano che le future pellicole sarebbero diventate disponibili esclusivamente per gli abbonati Disney+. Con un prezzo iniziale strategico di 6,99\$ al mese (strategico in quanto Netflix in quell’anno aveva annunciato di alzare i prezzi degli abbonamenti tra il 13 e il 18% arrivando a far pagare agli utenti un abbonamento mensile standard pari a 8,99 dollari al mese, decisione drastica ma necessaria prevalentemente per coprire i costi delle grandi produzioni materiali originali, che sono uno dei punti forti della società californiana e nelle quali ha investito circa 8 miliardi di dollari solamente nel 2018, notizia che tra l’altro ha fatto risalire il titolo del 5% a Wall Street ), Disney+ avrebbe rappresentato un'offerta di intrattenimento interessante per i consumatori e un vantaggioso rapporto qualità-prezzo, offrendo un valore per i consumatori destinato ad aumentare nel tempo man mano che ulteriori contenuti al servizio sarebbero stati aggiunti. In base ai piani di lancio e all'entità e alla frequenza degli investimenti nei contenuti, si prevedeva che Disney+ avrebbe raccolto tra i 60 e i 90 milioni di abbonati in tutto il mondo entro la fine dell'anno fiscale 2024 . In realtà, secondo le statistiche delle principali piattaforme di streaming media globali del 2024, Disney+ contava un totale di 150 milioni di abbonati in tutto il mondo in parte grazie alla sua capacità di innovazione nella creazione di contenuti e nel franchising (acquistando studi cinematografici come Pixar, 21st Century Fox e Marvel Entertainment), e in parte dovuta al difficile contesto cinematografico negli ultimi dieci anni. Le statistiche mostrano che dal 2010 al 2023, i principali studi cinematografici di Hollywood, tra cui Disney e Warner Bros. Discovery, hanno ridotto la loro media di film a 83 all'anno, mentre dal 1995 al 2009 avevano una media di 112 film all'anno. Nel 2023, i ricavi e i profitti annuali di Disney sono diminuiti rispettivamente dell'8% e del 3,23%. I ricavi e i profitti annuali di Warner Bros. Discovery sono diminuiti rispettivamente del 12% e del 19%. Sebbene però i ricavi e i profitti siano diminuiti, con lo sviluppo rapido della tecnologia Internet e la diffusione dei dispositivi intelligenti, il pubblico è sempre più propenso a guardare film e serie TV tramite piattaforme di streaming in qualsiasi momento e ovunque. Questo metodo di visione comodo ha attirato una base di utenti enorme, portando a un aumento del numero di utenti sulle piattaforme di streaming. Raccogliendo i dati degli utenti, le piattaforme di streaming possono creare profili utenti precisi e offrire raccomandazioni personalizzate. Questo metodo di raccomandazione migliora l’esperienza di visione degli utenti, aumenta il loro coinvolgimento e genera potenziali nuove fonti di guadagno per le aziende. Oltre la Disney, che, come detto, si è adattata al contesto lanciando Disney+, anche Warner Bros. nel 2020 lanciò HBO MAX basando la propria strategia ad una diversa tipologia di consumatori, offrendo una minore quantità e tipologia di contenuti indirizzati principalmente ad un pubblico adulto e basati sulla realtà, differenziandosi così dal colosso Disney, che invece offre prodotti più adeguati ad un pubblico familiare e avente inoltre numerose proprietà intellettuali. Strategia risultatasi vincente in quanto HBO MAX nel 2024 ha registrato un totale di 95 milioni di iscritti, classificandosi al quarto posto nella classifica mondiale. Altre case cinematografiche però, si sono rifiutate di creare le proprie piattaforme streaming e hanno deciso di intraprendere strade differenti. La Sony Pictures, ad esempio, è stata definita come “trafficante d'armi nella corsa agli armamenti”, riferendosi cioè al principale mandato aziendale di Hollywood di lanciare e servire concorrenti di streaming di giganti come Netflix e Disney plus. Sony non solo aveva negoziato due storici accordi di licenza televisiva che avrebbero portato quasi tre miliardi di dollari di ricavi al negozio di proprietà giapponese, ma aveva anche assicurato un redditizio accordo per il primo sguardo per uno streaming cinematografico senza dover lanciare un altro concorrente in un mercato affollato di aspiranti OTT. La prima transazione è stata per l’appunto, un accordo di circa cinque anni con Netflix, che ha vinto un'asta accesa per i diritti di licenza di tutti i film Sony Pictures nella finestra "pay 1" — la prima volta che un film può andare in onda in televisione dopo l'uscita nelle sale e nell'intrattenimento domestico. Il secondo accordo, per la finestra "pay 2", si è manifestato come un ambizioso e rivoluzionario accordo su tutti i motori di distribuzione Disney. L'accordo con Netflix si avvicina a un valore vicino a 2 miliardi di dollari nel suo periodo, con l'accordo con la Disney che porta il pacchetto nel territorio dei 3 miliardi di dollari. L’altra grande casa cinematografica che non ha fatto ricorso all’uso di una propria piattaforma streaming è MGM (Metro Goldwyn Mayer), la quale ha ingaggiato le banche d'affari Morgan Stanley e LionTree per valutare la vendita della società, a causa dell'impossibilità di sostenere da sola la competizione della spesa in contenuti contro i colossi dello streaming. Questa trattativa si concluse nel maggio 2021 con l'acquisto da parte di Amazon per un valore di 8,45 miliardi di dollari.
 
-### Sottosezione Intro
+## L'impatto economico degli shock strutturali e della pandemia nel mercato dell'audiovisivo
 
-Chapters and sections are numbered by default. To un-number a heading, add a `{.unnumbered}` or the shorter `{-}` at the end of the heading, like in this section.
+Dal Global Home/Mobile Entertainment Market (US in billions) del THEME Report 2019 si può quantificare in maniera sostanziale il cambio di regime del mercato nel periodo pre-Covid causato dallo shock strutturale della digitalizzazione. In particolare, emergono: 
+
+- La crescita costante e accelerata del mercato globale dell’intrattenimento complessivo (somma di fisico e digitale, domestico e internazionale), passato da 36,3 miliardi di dollari nel 2015 a 58,8 miliardi di dollari in soli 5 anni, maturando una crescita del 14%.
+
+- L’esplosione del digitale.
+
+  I dati mostrano sostanzialmente il trade-off causato dall’adozione dello streaming e delle piattaforme online: a livello internazionale il digitale è quasi quadruplicato passando da 7,7 miliardi di dollari nel 2015 a 28,2 miliardi, una percentuale di variazione in aumento pari al 266,23%, dove anche negli Stati Uniti è stata registrata una crescita altrettanto marcata, cresciuta del 18% tra il 2018 e il 2019.
+
+- Il crollo del fisico.
+
+Sia il mercato statunitense che quello internazionale registrano una contrazione sistematica anno per anno, rispettivamente del 19% e del 18% in soli 5 anni.
+
+Inoltre, nell'anno prima della pandemia si assiste al ribaltamento del digitale tra le due posizioni geografiche: sebbene nel 2015 il mercato americano era superiore rispetto a quello internazionale (\$8,9 per il primo e \$7,7 per il secondo), la situazione si è invertita a fine 2019 mostrando come l’espansione internazionale ha fatto sì che il comparto digitale internazionale (pari a \$28,2) superasse di gran lunga quello domestico statunitense (\$20,5). Secondo quanto riportato dal THEME Report del 2019 dunque, si evince una netta esplosione della digitalizzazione, fenomeno poi consolidatosi nel 2019, dove a subirne le conseguenze, tra tanti, è stato proprio il mercato del cinema. I dati mostrano che dal 2015 il mercato globale delle sale cinematografiche (box office) è cresciuto dell’8%, mentre il mercato dell’intrattenimento domestico/mobile (sia contenuti distribuiti in formato digitale che su supporto fisico) è invece aumentato del 62%, trainato dal comparto digitale. Con il mercato fisico oramai in via d’estinzione e il cinema che cresce sempre più lentamente, il mercato digitale in abbonamento sta prendendo il sopravvento mostrando un andamento quasi esponenziale. Il grafico a torta riportato nel THEME Report mette in evidenza la prova visiva del “sorpasso storico” dell’era digitale sulle sale cinematografiche. Nel 2019 per l’appunto il digitale in abbonamento (Digital, 48%), ha ufficialmente superato l’incasso di tutti i cinema fisici del mondo (Theatrical, 42%), mentre invece il mercato fisico (vendita e noleggio di Blu-ray e DVD) che ricopre soltanto una piccola fetta della torta (10%) sta ormai sempre più scomparendo. La crisi affrontata dall’industria cinematografica arrivò inevitabilmente nel 2020 con il COVID-19, dove le sale e le società di produzione hanno subito ingenti perdite e ricavi.
+
+```{r cinemark-table, echo=FALSE, message=FALSE, warning=FALSE}
+library(knitr)
+library(kableExtra)
+
+# Dati della tabella
+tabella_cinemark <- data.frame(
+  Voce = c(
+    "Revenues", 
+    "Admissions", 
+    "Concession", 
+    "Other", 
+    "Total revenues",
+    "Cost of operations",
+    "Film rentals and advertising",
+    "Concession supplies",
+    "Salaries and wages",
+    "Facility lease expense",
+    "Utilities and other",
+    "General and administrative expenses",
+    "Depreciation and amortization",
+    "Impairment of long-lived and other assets",
+    "Restructuring costs",
+    "(Gain) loss on disposal of assets and other",
+    "Total cost of operations",
+    "Operating income (loss) Other income (expense)",
+    "",
+    "Net income (loss)",
+    "Less: Net income (loss) attributable to noncontrolling interests",
+    "Net income (loss) attributable to Cinemark Holdings, Inc."
+  ),
+  `2019` = c(
+    "", "1,805,321", "1,161,083", "316,695", "3,283,099",
+    "", "1,003,832", "206,441", "410,086", "346,094",
+    "474,711", "173,384", "261,155", "57,001", "",
+    "12,008", "2,944,712", "338,387",
+    "", "193,848", "2,462", "191,386"
+  ),
+  `2020` = c(
+    "", "356,508", "231,046", "98,756", "686,310",
+    "", "186,810", "48,647", "145,031", "279,764",
+    "229,505", "127,599", "259,776", "152,706", "20,369",
+    "-8,923", "1,441,284", "-754,974",
+    "", "-617,948", "-1,120", "-616,828"
+  ),
+  check.names = FALSE
+)
+
+kable(tabella_cinemark, 
+      format = "latex",
+      booktabs = TRUE,
+      align = c("l", "r", "r"), 
+      caption = "Cinemark Holdings - Income Statement 2019-2020 (migliaia di dollari)") %>%
+  kable_styling(
+    latex_options = c("hold_position", "scale_down"),
+    full_width = TRUE
+  ) %>%
+  # Righe in grassetto con sfondo giallo
+  row_spec(5,  bold = TRUE, background = "#FFFF00") %>%  # Total revenues
+  row_spec(18, bold = TRUE, background = "#FFFF00") %>%  # Operating income
+  row_spec(22, bold = TRUE, background = "#FFFF00") %>%  # Net income Cinemark
+  # Righe intestazione sezione in grassetto
+  row_spec(1,  bold = TRUE) %>%  # Revenues
+  row_spec(6,  bold = TRUE) %>%  # Cost of operations
+  row_spec(20, bold = TRUE) %>%  # Net income (loss)
+  row_spec(21, bold = TRUE) %>%  # Less: Net income
+  # Colore verde chiaro alternato alle righe
+  row_spec(c(2,4,7,9,11,13,15,17), background = "#E8F5E9") %>%
+  row_spec(c(3,8,10,12,14,16), background = "#C8E6C9")
+
+```
+
+Cinemark Holdings Inc. è uno dei principali operatori nel settore delle sale cinematografiche, avente una presenza significativa negli USA e in America Latina. Opera circa 500 cinema con 5.700 schermi distribuiti in 42 stati americani e 13 paesi dell’America Latina. Nella tabella 1.1 emergono alcune voci del Consolidated Statement of Income (Conto Economico consolidato) a cavallo dello scoppio della pandemia in cui si notano immediatamente le perdite drastiche subite alla fine del 2020:\
+• Total Revenues (Ricavi totali): mentre nel 2019 fatturava 3,28 miliardi di dollari, dalla chiusura delle sale la società ha subito un crollo del 79,09%, composto da un crollo della vendita dei biglietti dell’80,25% e da un crollo sulla vendita di cibi e bevande dell’80,10%.\
+• All’interno dei costi operativi possiamo trovare due voci importanti, quali Salaries and wages (Stipendi del personale): scendono da \$410M a \$145M (effetto dei licenziamenti/cassa integrazione) e Facility lease expense (Affitti/Leasing dei locali) i quali passano da \$346M nel 2019 a \$280M nel 2020. Queste dimostrano l'incomprimibilità dei costi fissi: anche con i cinema del tutto chiusi e zero incassi, Cinemark ha dovuto comunque pagare quasi 280 milioni di dollari solo di affitti degli immobili per le sale.\
+• Operative Income (loss) / EBIT: pari alla differenza tra i ricavi totali e i costi operativi totali before interest and taxes, è un indicatore fondamentale che mostra la redditività di un’impresa prima di aver dedotto gli oneri finanziari e le imposte e che fornisce una visione chiara e diretta della capacità dell'azienda di generare utili attraverso le sue attività operative. Sebbene nel 2019 avesse registrato un utile operativo di 338, 4 milioni di dollari, a causa della situazione che il modo stava attraversando, in un solo anno ha registrato una perdita operativa di 754,9 milioni.\
+• Net income (loss) attributable to Cinemark Holdings, Inc.: il risultato finale alla fine del 2020, come si poteva dedurre, è stata una perdita di 616,8 milioni di dollari. L'impatto del COVID-19 sul mercato delle sale cinematografiche in Europa invece, è ben rappresentato dal bilancio consolidato di Cineworld Group plc, il secondo circuito di cinema più grande al mondo e il leader indiscusso sul mercato europeo/UK (proprietaria anche del marchio Regal negli USA e di Picturehouse). Sebbene nel 2019 Cineworld fatturava oltre 4,37 miliardi di dollari, nel 2020 si sono fermati ad appena \$852,3 milioni, registrando un crollo del fatturato dell’80,5%. L’EBIT a sua volta, come per Cinemark, è diminuito in modo abissale (2,25 miliardi di perdita operativa). Il 2020 ha chiuso con una perdita netta spaventosa di -2,65 miliardi di dollari.
+
+```{r cineworld-table, echo=FALSE, message=FALSE, warning=FALSE}
+library(knitr)
+library(kableExtra)
+
+# Dati della tabella
+tabella_cineworld <- data.frame(
+  Voce = c(
+    "Revenue",
+    "Cost of sales",
+    "Gross profit/(loss)",
+    "Other operating income",
+    "Administrative expenses",
+    "Net reversal of impairment/(impairment) of goodwill, property, plant and equipment, right-of-use assets and investments",
+    "Operating profit/(loss)",
+    "Adjusted EBITDA as defined in Note 2",
+    "Finance income",
+    "Finance expenses",
+    "Net finance costs",
+    "Share of loss from jointly controlled entities using equity accounting method net of tax",
+    "Loss before tax",
+    "Tax credit on loss",
+    "Loss for the year attributable to equity holders of the Group",
+    "Basic Deficit Per Share",
+    "Diluted Deficit Per Share"
+  ),
+  Note = c(
+    "4", "", "", "5", "", "",
+    "6", "2", "9", "9", "", "", "", "10", "", "7", "7"
+  ),
+  `Year ended 31 Dec 2021 $m` = c(
+    "1,804.9", "(1,263.2)", "541.7", "15.4", "(668.4)", "127.1",
+    "15.8", "454.9", "208.4", "(899.2)", "(690.8)", "(33.3)",
+    "(708.3)", "142.5", "(565.8)", "(41.2)", "(41.2)"
+  ),
+  `Year ended 31 Dec 2020 $m` = c(
+    "852.3", "(888.1)", "(35.8)", "2.3", "(879.7)", "(1,344.5)",
+    "(2,257.7)", "(115.1)", "69.6", "(786.8)", "(717.2)", "(33.0)",
+    "(3,007.9)", "356.4", "(2,651.5)", "(193.2)", "(193.2)"
+  ),
+  check.names = FALSE
+)
+
+kable(tabella_cineworld,
+      format = "latex",
+      booktabs = TRUE,
+      align = c("l", "c", "r", "r"),
+      col.names = c("", "Note", 
+                    "Year ended 31 December 2021 $m", 
+                    "Year ended 31 December 2020 $m"),
+      caption = "Cineworld Group - Income Statement 2020-2021") %>%
+  kable_styling(
+    latex_options = c("hold_position", "scale_down"),
+    full_width = TRUE
+  ) %>%
+  # Righe in grassetto
+  row_spec(1,  bold = TRUE) %>%   # Revenue
+  row_spec(3,  bold = TRUE) %>%   # Gross profit/(loss)
+  row_spec(7,  bold = TRUE) %>%   # Operating profit/(loss)
+  row_spec(8,  bold = TRUE) %>%   # Adjusted EBITDA
+  row_spec(11, bold = TRUE) %>%   # Net finance costs
+  row_spec(13, bold = TRUE) %>%   # Loss before tax
+  row_spec(15, bold = TRUE) %>%   # Loss for the year
+  # Linee separatrici (sfondo grigio chiaro)
+  row_spec(7,  extra_latex_after = "\\hline") %>%
+  row_spec(8,  extra_latex_after = "\\hline") %>%
+  row_spec(15, extra_latex_after = "\\hline") %>%
+  # Colonna Note centrata
+  column_spec(1, width = "7cm") %>%
+  column_spec(2, width = "1cm") %>%
+  column_spec(3, width = "3cm") %>%
+  column_spec(4, width = "3cm")
+```
+
+Nel Consolidated Statement of Profit or Loss dell'esercizio 2021, sebbene le riaperture abbiano consentito un parziale recupero del fatturato (\$1,80 miliardi) e un ritorno ad un reddito operativo positivo di \$15,8 milioni, per rimanere in vita nel 2020 e 2021, Cineworld si è indebitata a tassi altissimi: gli interessi passivi (\$899,2M) hanno azzerato qualsiasi margine operativo, portando il risultato finale prima delle tasse (Loss before tax) a un'ulteriore perdita di -\$708,3 milioni e una perdita netta finale di -\$565,8 milioni. L'analisi dell'andamento pandemico nel continente asiatico, invece, dove la crisi sanitaria si è manifestata con mesi di anticipo, trova nel bilancio di Wanda Film Holding Co., Ltd la testimonianza dello shock sistemico subito dal settore. Wanda film Holdings è il più grande operatore di sale cinematografiche in Cina e in Asia. La Cina è stato il primo mercato a chiudere (già da gennaio/febbraio 2020) a causa della pandemia, la quale ha inflitto una perdita netta di circa CNY1,6 miliardi (224,3 milioni di dollari) alla catena cinese, il cui profitto netto nello stesso periodo dello scorso anno era di CNY524 milioni (circa 77,4 milioni di dollari). La società con sede a Pechino ha subito un crollo di circa 295,4 milioni di dollari di fatturato, un calo annuale del 73,9% nei primi sei mesi del 2020, di cui 580 milioni di CNY (\$83,1 milioni) provenivano da un calo al botteghino dell'88,3% rispetto all'anno precedente, secondo il rapporto semestrale dell'operatore cinematografico. Oltre 600 cinema affiliati alla società hanno chiuso dal 23 gennaio a causa del Covid, e anche quelli che possiede all'estero hanno chiuso alla fine di marzo. I ricavi dei cinema cinesi, dunque, crollarono durante la crisi pandemica e le loro operazioni si fermavano (17 sale inefficienti chiusero e i costi fissi rimasero a carico della società, come ad esempio gli affitti dei locali). L'incassato complessivo del mercato cinematografico del paese è stato di soli 324,9 milioni di dollari nella metà, in calo del 92,8 percento all'anno, con il numero degli spettatori sottigliandosi a circa 60 milioni, in un calo del 92,6 percento rispetto al 2019 . Se da una parte la pandemia ha devastato le aziende avente come core business sale cinematografiche, dall’altro ha contribuito allo sviluppo della Stay-at-Home Economy, beneficiando le piattaforme streaming digitali come Netflix, Disney+ e tante altre. Nel 2020 infatti, le sottoscrizioni a servizi video online (SVOD) hanno superato 1 miliardo di utenti nel mondo, raggiungendo quota 1,1 miliardi, un aumento del 26%, ossia +232,1 milioni di abbonati solamente in un anno tra il 2020 e il 2019. Il mercato globale del digital home entertainment è cresciuto del 31%, raggiungendo un valore di 68,8 miliardi di dollari. Il mercato digitale è stato il driver della crescita: in America è cresciuto del 33% e quello internazionale del 30% rispetto al 2019. Il solo comparto delle sottoscrizioni online ha registrato un balzo di 14,3 miliardi di dollari (+34%), dove solamente negli Stati Uniti sono cresciuti del 32%, toccando i 308,6 milioni. Ad esempio, il colosso dello streaming Netflix, solamente nel primo trimestre del 2020 ha registrato un aumento record di 15,766 milioni di nuovi abbonati netti, un balzo del 64% rispetto al primo trimestre dell’anno precedente. Alla fine del 2020, invece, Netflix ha superato per la prima volta la soglia dei 200 milioni di abbonati globali (203,633 milioni), aggiungendone 36,6 milioni in un solo anno, record assoluto nella storia della società (+31% rispetto al 2019) . Il lockdown, inoltre, è stato uno dei fattori più importanti per Disney+, poiché ha contribuito a battere le aspettative dei 60-90 milioni di abbonati nel 2024 (come già citato in precedenza), raggiungendo già nel novembre 2020 la cifra di 73,3 milioni di abbonati.\
+Una volta tornati alla normalità, il rallentamento della crescita delle piattaforme streaming era quasi inevitabile: “La grande spinta del Covid allo streaming ha oscurato il quadro", affermava Netflix, spiegando le difficoltà di acquisizione di nuovi clienti in mezzo all'intensa concorrenza di rivali affermati come Amazon.com, Walt Disney Co, la neonata Warner Bros Discovery Inc e nuovi arrivati come Apple. Tanto è che Netflix nel 2022 ha dovuto affrontare una perdita di 200.000 abbonati, le azioni del colosso dello streaming globale sono arrivate a perdere il 22,5%, dopo aver previsto una crescita di 2,7 milioni di utenti nello stesso anno, segnando la sua prima perdita di abbonati in oltre un decennio. I ricavi del primo trimestre 2022 sono aumentati del 10% a 7,87 miliardi di dollari, ma al di sotto delle previsioni di Wall Street a 7,93 miliardi. L'utile scendeva a 1,6 miliardi dagli 1,71 miliardi dello stesso periodo dell'anno precedente, questo dovuto al gran numero di famiglie che condividevano account anche ad amici e parenti, che combinato con la concorrenza, ha creato venti contrari alla crescita dei ricavi. I servizi di streaming hanno speso 50 miliardi di dollari in nuovi contenuti nel 2021, nel tentativo di attrarre o trattenere abbonati, secondo la società specializzata Ampere Analysis. Si tratta di un aumento del 50% rispetto al 2019, quando molti dei nuovi servizi di streaming sono stati lanciati, segnalando la rapida escalation delle cosiddette "guerre dello streaming". Poiché la crescita rallenta nei 'mercati maturi' come gli Stati Uniti, Netflix si concentra sempre più su altre parti del mondo e investe sempre più in contenuti in lingua locale. Netflix è stato in grado di aumentare i prezzi degli abbonamenti negli Stati Uniti, nel Regno Unito e in Irlanda per finanziare la produzione e la crescita di contenuti in altre parti del mondo, come in Asia, anche se gli abbonamenti in questi mercati in crescita risultano essere inferiori alle attese . Comunque sia, nonostante l’anno difficile avuto da Netflix nel 2022, l’aumento del numero dei competitor nel settore e il rallentamento della crescita, secondo la serie storica sull'andamento trimestrale degli abbonati globali D2C di Netflix, Disney+, Warner Bros e Paramount dal Q1 2023 al Q4 2025 emerge che Netflix continua ad avere una posizione dominante, e secondo il 68% degli esperti è ancora quella con il maggior potenziale di crescita al mondo.
+
+
+## La revisione della letteratura
+
+### Incertezza e dinamica stocastica del box office
+
+
+Nel 1996 venne fatto uno studio da parte di Arthur De Vany e David Walls [@devany_walls_1996] i quali formalizzarono l'ipotesi che l'industria cinematografica fosse caratterizzata da un livello di incertezza radicale ("nobody knows"), in cui il successo commerciale di un'opera non è determinabile a priori sulla base di input strutturali (quali il budget o la presenza di star), ma emerge in modo dinamico e sequenziale. Attraverso la formulazione di un modello di scelta bayesiana, De Vany e Walls dimostrarono che la scoperta della qualità del film da parte del pubblico iniziale innescasse un meccanismo di trasmissione informativa (word-of-mouth ed information cascades). Meccanismo che oggigiorno viene amplificato dal processo di digitalizzazione, in particolare dai social media, attraverso i quali il passaparola è diventato virale a alla portata di tutti. Comunque sia, tale processo di feedback positivo generò dinamiche distributive riconducibili alla statistica di Bose-Einstein, caratterizzate da una spiccata autocorrelazione nella crescita dei ricavi e da una distribuzione finale degli incassi a "code pesanti" (fat tails). Dal punto di vista econometrico, il rigetto dell'ipotesi di normalità e log-normalità dei ricavi al box office evidenzia come il mercato delle sale funzioni secondo logiche di path-dependence e rendimenti crescenti, in cui pochi prodotti ("hits") catturano la quota maggioritaria delle entrate complessive dell'industria, mentre la maggior parte delle opere subisce un rapido deterioramento della domanda ("flops").
+Successivi articoli scientifici hanno spostato l'attenzione, invece che sulle dinamiche microeconomiche di passaparola e sull'incertezza del singolo titolo al box office, sulla dinamica macro-temporale della domanda cinematografica. Le serie storiche degli incassi e delle presenze nelle sale sono caratterizzate, tramite l'analisi econometrica, dalla natura e dalla stabilità delle componenti stagionali. Sotto il profilo metodologico, Hand e Judge nel 2011 [@hand_judge_2011] implementarono un Modello di Serie Storiche Strutturali (STSM - Structural Time Series Model), scomponendo la serie logaritmica delle presenze mensili in componenti stocastiche di trend, stagionalità ed errore irregolare. Attraverso il test del rapporto di verosimiglianza (Likelihood Ratio test) applicato ai parametri del modello, gli autori dimostrarono l'impossibilità di rigettare l'ipotesi di stagionalità fissa. Tale evidenza empirica suggerisce che, nonostante le strategie di release timing adottate dagli studios, la componente esogena della stagionalità domina in modo determinante l'andamento aggregato della domanda. Dal punto di vista della modellizzazione predittiva e quantitativa, questo risultato fornisce una giustificazione teorica fondamentale per l'impiego di modelli delle serie storiche (quali i modelli SARIMA) capaci di isolare ed estrapolare le componenti stagionali deterministiche o debolmente stocastiche per la stima della domanda di intrattenimento.
+
+
+### L'effetto disruptive dello streaming nel mercato
+
+
+Sangwon Lee Seonmi Lee Hyemin Joo Yoonjae Nam nel 2021 pubblicarono un paper scientifico [@lee_etal_2021] con lo scopo di analizzare i fattori che guidano la crescita delle piattaforme streaming video a pagamento (OTT / SVOD) e verificare se l'ingresso di Netflix e lo sviluppo dello streaming agiscano come complemento o sostituto rispetto alla Pay TV tradizionale (cavo, satellite, IPTV). Gli autori utilizzarono un dataset panel di 50 paesi coprendo un arco temporale di 5 anni (2012–2016, 250 osservazioni totali). Per l'analisi utilizzarono un modello ad effetti fissi (Pooled OLS) al posto del modello dei minimi quadrati ordinari in quanto i modelli Pooled OLS assumono che tutti i paesi/aziende siano omogenei, correndo il rischio di introdurre una distorsione da eterogeneità (heterogeneity bias). Il modello ad effetti fissi tiene conto delle differenze strutturali non osservabili specifiche di ogni singolo paese ($\gamma_i \alpha_i$), garantendo stime dei coefficienti corrette e non distorte (unbiased estimates). Inizialmente utilizzarono un modello di base senza ritardi temporali, utilizzando come variabile Netflix per vedere se questa aumentasse in modo significativo la dimensione del mercato OTT / SVOD nel paese di riferimento:
+
+\begin{equation}
+\begin{split}
+P\_OTT_{it} = \, & \beta_0 + \beta_1 \cdot BROADBAND_{it} + \beta_2 \cdot OTT\_PCOM_{it} \\
+                 & + \beta_3 \cdot POD_{it} + \beta_4 \cdot Netflix_{it} \\
+                 & + \beta_5 \cdot PayTVMARKET_{it} + \beta_6 \cdot INC_{it} \\
+                 & + \gamma_i \alpha_i + \varepsilon_{it}
+\end{split}
+(\#eq:modello1)
+\end{equation}
+
+In effetti l'effetto dell'arrivo di Netflix nel mercato dello streaming era immediato ($\beta = 0.2642, p < 0.05$); poi utilizzarono anche il modello di base con ritardo a uno e a due anni inserendo le variabili lagged ($t-1$ e $t-2$), il quale ha permesso di capire se l'impatto dell'ingresso di Netflix sul mercato locale persistesse negli anni successivi o se si esaurisca subito, confermando l'effetto Catfish: l'ingresso di un operatore globale dinamico scuote il mercato locale, spingendo sia gli utenti sia i competitor locali ad adottare la fruizione in streaming.
+
+\begin{equation}
+\begin{split}
+P\_OTT_{it} = \, & \beta_0 + \beta_1 \cdot BROADBAND_{it} + \beta_2 \cdot OTT\_PCOM_{it} \\
+                 & + \beta_3 \cdot POD_{it} + \beta_4 \cdot Netflix_{it-1} \\
+                 & + \beta_5 \cdot Netflix_{it-2} + \beta_6 \cdot PayTVMARKET_{it} \\
+                 & + \beta_7 \cdot INC_{it} + \gamma_i \alpha_i + \varepsilon_{it}
+\end{split}
+(\#eq:modello2)
+\end{equation}
+
+Per il lag ad 1 anno ($\text{Netflix}_{i,t-1}$) la tesi viene confermata ($\beta = 0.3327, p < 0.01$): l'effetto positivo dell'arrivo di Netflix continua in modo significativo anche l'anno successivo all'ingresso. Per quanto riguarda invece il secondo lag ($\text{Netflix}_{i,t-2}$)la tesi non viene confermata ($\beta = 0.1599, p = 0.195$, non significativo): L'effetto "spinta" (effetto catfish) dell'ingresso di Netflix si stabilizza/esaurisce al secondo anno dall'entrata. 
+
+
+```{r tabella7, echo=FALSE, message=FALSE, warning=FALSE}
+library(knitr)
+library(kableExtra)
+
+# Dati della tabella
+tab7 <- data.frame(
+  Variable = c(
+    "ln\\_Total broadband infrastructure",
+    "OTT platform competition",
+    "Population density",
+    "Netflix market entry($t$)",
+    "Netflix market entry($t$-1)",
+    "Netflix market entry($t$-2)",
+    "Traditional pay TV market size",
+    "Income",
+    "Constant",
+    "Country impact controlled",
+    "$F$/R$^2$",
+    "Number of observations"
+  ),
+  coefB_1 = c(
+    "1.0054", "0.0000", "$-$0.0004", "0.2642",
+    "--", "--", "0.0003", "0.0001", "$-$4.3940",
+    "yes",
+    "$F$(6,150) = 43.03 / R$^2$ = 0.5748",
+    "247"
+  ),
+  pval_1 = c(
+    "0.000", "0.992", "0.831", "0.030",
+    "--", "--", "0.002", "0.000", "0.000",
+    "", "", ""
+  ),
+  coefB_2 = c(
+    "0.8013", "0.00005", "0.0025", "--",
+    "0.3327", "0.1599", "0.0003", "0.00003", "$-$3.6451",
+    "yes",
+    "$F$(7,143) = 34.39 / R$^2$ = 0.6273",
+    "200"
+  ),
+  pval_2 = c(
+    "0.000", "0.076", "0.073", "--",
+    "0.005", "0.195", "0.004", "0.000", "0.000",
+    "", "", ""
+  )
+)
+
+kable(tab7,
+      format = "latex",
+      booktabs = TRUE,
+      escape = FALSE,
+      col.names = c("Variable", "coef B", "\\textit{p}-Value",
+                    "coef B", "\\textit{p}-Value"),
+      caption = "Regressions of paid OTT video streaming market growth.",
+      align = c("l", "c", "c", "c", "c")
+) %>%
+  kable_styling(
+    latex_options = c("hold_position", "scale_down"),
+    font_size = 10
+  ) %>%
+  add_header_above(c(
+    " " = 1,
+    "Netflix (No Time-Lag)" = 2,
+    "Netflix (1- and 2-Year Time-Lag)" = 2
+  )) %>%
+  row_spec(0, bold = TRUE) %>%
+  row_spec(9, hline_after = TRUE) %>%
+  row_spec(10, hline_after = TRUE) %>%
+  row_spec(11, hline_after = TRUE)
+```
+
+
+
+Inoltre, gli autori utilizzarono anche un modello per il tasso di crescita della Pay TV tradizionale per analizzare se lo sviluppo dell'OTT danneggia o aiuta la Pay TV tradizionale, verificando le ipotesi di complementarietà (crescono insieme) vs sostituzione/cannibalizzazione.
+
+\begin{equation}
+\begin{split}
+LnPayTVCAGR_{it} = \, & \beta_0 + \beta_1 \cdot LnP\_OTTCAGR_{it} + \beta_2 \cdot Netflix_{it} \\
+                      & + \beta_3 \cdot PayTV\_OTT\_HHI_{it} + \beta_4 \cdot INC_{it} \\
+                      & + \beta_5 \cdot POD_{it} + \beta_6 \cdot Fixed\_B_{it} \\
+                      & + \gamma_i \alpha_i + \varepsilon_{it}
+\end{split}
+(\#eq:modello3)
+\end{equation}
+
+
+Per il tasso di crescita OTT ($\text{LnP\_OTTCAGR}_{it}$) l'effetto complementare fu confermato ($\beta = 0.0545, p < 0.05$). Nella fase iniziale analizata dal paper, dove il mercato OTT cresce, cresce anche il tasso di crescita della Pay TV tradizionale. I due media sono inizialmente evoluti come complementari. L'ingresso di Netflix ($\text{Netflix}_{it}$) viene vista come una minaccia di sostituzione ($\beta = -0.1776, p < 0.01$). Nonostante la crescita generale congiunta dei due settori, la presenza specifica di Netflix ha un coefficiente negativo e significativo sul tasso di crescita dei ricavi della Pay TV. Ciò dimostra che Netflix agisce come un sostituto diretto nel lungo periodo, sottraendo crescita alla TV via cavo/satellite. Concentrazione di mercato PayTV/OTT ($\text{PayTV\_OTT\_HHI}_{it}$): CONFERMATO ($\beta = 0.0002, p < 0.01$).
+Sebbene lo studio fatto non dimostri come l'avvento delle piattaforme streaming abbia danneggiato le sale cinematografiche e cambiato il modo in cui le persone scelgano di vedere i film, è ottimo per dimostrare l'impatto che le piattaforme SVOD hanno avuto nel mercato dell'audiovisivo.
+
+Nel 2025 Duarte de Souza, Nishijima e Rodrigues [@duarte_souza_etal_2025] hanno affrontato direttamente il problema dell'impatto dello streaming sui ricavi delle sale cinematografiche. Gli autori hanno utilizzano l'introduzione dei servizi di streaming di Netflix negli USA nel 2007 come shock esogeno e il mercato cinematografico dell'Australia come gruppo di controllo. L'Australia ha una fortissima affinità culturale, linguistica ed economica con gli USA (stesso livello di reddito pro capite), ma Netflix vi è stato introdotto solo nel 2015. Di conseguenza, tra il 2007 e il 2014, i film proiettati in Australia non erano esposti alla concorrenza di Netflix, a differenza di quelli negli USA. Di conseguenza, è stato applicato un modello Difference-In-Differencies (DIF) su un campione di 950 film ad ampia distribuzione usciti sia negli USA che in Australia tra il 2004 e il 2014.
+Per valutare l'effetto dell'introduzione di Netflix, gli autori hanno stimato un modello baseline descritto dalla seguente equazione di regressione:
+
+$$
+R_{ict} = \alpha_0 + \alpha_1 US_c + \alpha_2 S_t + \alpha_3 S_t \times US_c + \Lambda' X_{ict} + u_{ict}
+\tag{1}
+$$
+La variabile dipendente, R, è il logaritmo dei ricavi nazionali al botteghino del film i nel paese c, nell'anno t.
+$\text{US}_c$ è la variabile indicatrice pari a $1$ per gli USA e $0$ per l’Australia
+$S_t$ è la variabile indicatrice per il periodo post-trattamento (pari a $1$ per gli anni dal 2007 al 2014, e $0$ per gli anni pre-2007)
+$S_t \times \text{US}_c$ è la variabile chiave d'interesse.
+Il coefficente $\alpha_3$ misura l'effetto causale dell'avvento dello streaming sui ricavi dei cinema americani rispetto a quelli australiani.
+$\mathbf{X}_{ict}$ è l'insieme di variabili di controllo a livello di film e di mercato (budget, numero di sale al lancio, valutazioni di critica e pubblico, genere, rating MPAA, dummy mensili per la stagionalità, e dummy annuali per shock macroeconomici).
+
+Successivamente hanno applicato come test di robustezza avanzato il modello con effetti fissi per Film (Movie Fixed-Effects Model) utilizzando un'equazione di regressione specifica che include gli effetti fissi per singolo film ($\mu_i$):
+
+$$
+R_{ict} = \beta_0 + \beta_1 US_c + \beta_2 S_t + \beta_3 S_t \times US_c + \Omega' \tilde{X}_{ict} + \mu_i + v_{ict}
+\tag{2}
+$$
+$\mu_i$ (Effetto Fissato del Film): Controlla per tutte le caratteristiche non osservabili specifiche di ogni film.
+$\tilde{\mathbf{X}}_{ict}$: Vettore di controlli ridotto, da cui vengono rimosse le variabili specifiche del film (genere, budget, rating) in quanto catturate e assorbite dall'effetto fisso $\mu_i$. Si mantengono solo i controlli che variano tra i due paesi (es. numero di sale nel singolo paese) e le dummy di mese e anno. 
+
+I risultati empirici hanno evidenziato che l'avvento dello streaming ha provocato una riduzione compresa tra il 14% e il 17% degli incassi al box office americano. Tale contrazione conferma l'esistenza di un netto effetto sostituzione, guidato principalmente dal differenziale di prezzo e dai meccanismi di rinvio temporale del consumo da parte degli spettatori meno fidelizzati alla fruizione in sala.
+
+
+### Il comportamento dei consumatori in Europa
+
+
+Inoltre, in un recente saggio scientifico scritto da Papathanasopoulos e Varoutas (2026) [@lee_etal_2021] che analizza l'andamento del mercato SVOD nei 27 Paesi dell'Unione Europea (EU-27) su un arco temporale esteso fino al 2023, l'articolo dimostra come la crescita del mercato SVOD sia guidata in maniera schiacciante dalle infrastrutture di rete (banda larga fissa e velocità di connessione) e dalla diffusione di dispositivi smart (smartphone e smart remote), e non dai budget milionari spesi in produzioni originali. In particolare, gli autori introducono la teoria secondo cui i contenuti originali servirebbero alle piattaforme come elemento di differenziazione strategica per attrarre e fidelizzare abbonati. Vengono stimati modelli di regressione per dati panel ad Effetti Fissi con dummy per Paese ($\alpha_i$) e per Anno ($\gamma_t$), in modo da controllare l'eterogeneità non osservata e invariante nel tempo tra i 27 Paesi membri dell'UE:
+
+\begin{equation}
+Y_{it} = \beta X_{it} + \alpha_i + \gamma_t + e_{it}
+(\#eq:twoway)
+\end{equation}
+
+Due Variabili Dipendenti ($Y_{it}$):
+
+- Ricavi SVOD totali in milioni di Euro (Model 1).
+
+- Numero di abbonati/utenti SVOD in milioni (Model 2).
+
+Variabili Indipendenti di Contenuto ($X_{it}$):
+
+- Original's Content Spending: Spesa totale allocata per la produzione e acquisizione di contenuti originali
+
+- Original's Content Ratings: Valutazione/qualità media assegnata dagli utenti su IMDb ai titoli originali
+
+Nonostante l'ipotesi teorica prevedesse una correlazione positiva, i risultati del modello ad effetti fissi mostrano che la spesa in contenuti originali non è un driver statisticamente significativo per la crescita dello SVOD nell'EU-27:
+
+- Ricavi SVOD: Il coefficiente della spesa in contenuti originali è $\beta = -0.113$ ($p > 0.05$, statisticamente non significativo).
+
+- Abbonati SVOD: Il coefficiente della spesa in contenuti originali è $\beta = -0.070$ ($p > 0.05$, statisticamente non significativo).
+
+- Voti/Rating IMDb dei Contenuti Originali: Anche la qualità percepita tramite i punteggi degli utenti non risulta significativa nei modelli di stima.
+
+Lo studio dimostra come i consumatori europei tendano a sottoscrivere un abbonamento SVOD attirati principalmente dall'accesso ad ampi cataloghi di titoli storici e di successo (titoli in licenza), piuttosto che dalla presenza di singole produzioni originali ad alto budget. In un'ottica economico-industriale, questo risultato risulta particolarmente funzionale a ridimensionare l'ipotesi di una totale sostituzione del cinema tradizionale da parte delle piattaforme nel medio-lungo periodo. L'industria dello streaming continua infatti a dipendere fortemente dai contenuti generati dalla produzione cinematografica classica, confermando come l'esperienza della sala mantenga una funzione centrale nella creazione di valore e nell'attrazione del pubblico.
+
+## Aspettative future
+
+La presente tesi offre l'analisi e la quantificazione dei cambiamenti economici-finanziari che hanno stravolto il settore a seguito degli shock strutturali generati dalla digitalizzazione e dalla rapida diffusione delle piattaforme Subscription Video-On_Demand (SVOD). Dalla revisione della letteratura, emerge il tentativo di prevedere gli incassi delle sale tramite l'utilizzo di vari modelli parametrici, ben prima che la digitalizzazione prendesse il sopravvento; la transizione verso il paradigma delle piattaforme ha modificato radicalmente le dinamiche di fruizione dei contenuti e le preferenze dei consumatori, imponendo un riallineamento sia agli operatori tradizionali dell'esercizio cinematografico sia alle case di produzione. In questo scenario di incertezze, il principale obiettivo della ricerca è quello di valutare in che misura l'espansione dei modelli SVOD rappresenti una minaccia di sostituzione diretta per la filiera cinematografica tradizionale oppure se si stia delineando un nuovo equilibrio di complementarietà e interdipendenza tra i diversi canali distributivi. Nello specifico, si vuole perseguire due sotto-obiettivi interconnessi:
+
+- Isolare l'impatto delle piattaforme streaming sul mercato: valutare empiricamente la fase del ciclio di vita dei colossi dello streaming e se abbiano causato un effetto di cannibalizzazione oppure se abbiano contribuito ad un ridimensionamento del mercato da entrambi i lati.
+
+- Analizzare le dinamiche stocastiche e la prevedibilità della domanda: tramite la persistenza delle componenti stagionali e la volatilità delle serie storiche legate agli incassi del *box office*, verificare lo stato di salute delle sale cinematografiche.
+
+In seguito, si evincerà che la risoluzione del problema risiede nell'adozione di un approccio quantitativo e metodologico. Come è già stato dimostrato, gran parte degli studi esistenti in letteratura tendono a scindere l'analisi microeconomica del *box office* dalle valutazioni macroeconomiche sull'andamento delle piattaforme SVOD. Questo lavoro riunisce tali dimensioni all'interno di un unico *framework* econometrico sviluppato in ambiente R. Inoltre, sarà presente il tentativo di prevedere come il mercato si evolverà nel futuro imminente, tenendo a mente l'influenza dell'Intelligenza Artificiale.
