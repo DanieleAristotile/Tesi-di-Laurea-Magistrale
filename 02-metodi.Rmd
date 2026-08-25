@@ -757,3 +757,5 @@ La scelta del modello finale segue lo schema decisionale sul rango $r$:
 - $0 < r < k$: Presenza di $r$ relazioni di lungo periodo ($k - r$ trend comuni). Si stima il modello *VECM* con termine di correzione dell'errore $\Pi Y_{t-1}$.
 
 - $r = k$: Le variabili originarie non contengono trend stocastici e sono già stazionarie a livelli. Si stima un modello $\text{VAR}(p)$ a livelli ($Y_t$).
+
+
