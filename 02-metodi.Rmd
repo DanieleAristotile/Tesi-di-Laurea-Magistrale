@@ -1,20 +1,759 @@
-# Metodi {#ch2}
+# Metodologia {#ch2}
 
+## Proprietà dei processi stocastici e componenti delle serie storiche
 
-Sia dato il seguente processo stocastico
-$$ X_t = 0.8X_{t-1}  - 0.4X_{t-2} + e_t - 0.1 e_{t-1} \quad \text{con} \quad e_t \sim WNG(0, \sigma^2_e)$$
+Un processo stocastico viene definito come una successione ordinata di variabili aleatorie (funzioni che associano un valore numerico a ciascun possibile esito di un esperimento casuale), descritte da un parametro *t* che indica il tempo $$\{X_t\}_{t \in T}$$ dove T è un insieme, che può essere discreto o continuo.
 
+Le proprietà di un processo stocastico sono:
 
-## Sezione metodi
+- *Stazionarietà*, che rappresenta una condizione sulle relazioni tra *passato, presente e futuro*. Può essere intesa:
 
-$\begin{aligned}
-\gamma(0)&=E(X_t - \mu)^2 = E(e_t+\theta e_{t-1})^2\\
-&=E(e_t^2 + 2\theta e_t e_{t-1} + \theta^2 e_{t-1}^2)\\
-&=\sigma^2_e + 0 + \theta^2\sigma^2_e\\
-&=(1+\theta^2)\sigma^2_e
-\end{aligned}$
+  - in senso *debole:*
 
+    Un processo stocastico $\{X_t\}$ è stazionario in senso debole se:
 
-### Sottosezione metodi
+    1.  $E(X_t) = \mu$, ovvero il valore atteso è costante per ogni $t$ (non varia nel tempo)
 
-Chapters and sections are numbered by default. To un-number a heading, add a `{.unnumbered}` or the shorter `{-}` at the end of the heading, like in this section.
+    2.  $Var(X_t) = \sigma^2 = \gamma(0) < \infty$, ovvero la varianza è costante per ogni $t$ (non varia nel tempo)
+
+    3.  $Cov(X_t, X_{t+k}) = \gamma(k)$, ovvero la autocovarianza dipende solo dalla distanza temporale $k$ e non da $t$. Un processo stazionario in senso debole viene anche definito come stazionario in covarianza (covariance stationary). La condizione di stazionarietà in covarianza indica che le proprietà correlative (relazione di dipendenza) tra le variabili aleatorie sono costanti nel tempo se prese alla stessa distanza *k*.
+
+  - in senso *forte (o stretta):*
+
+    Un processo stocastico si dice stazionario in senso forte se la distribuzione congiunta di $(X_{t_1}, \ldots, X_{t_j})$ è la stessa della congiunta $(X_{t_1+k}, \ldots, X_{t_j+k})$ per qualunque $j \in Z$ e $k \in Z$
+
+    La stazionarietà in senso forte rappresenta una sorta di omogeneità della struttura probabilistica del processo rispetto al tempo $t$
+
+Inoltre, è da tenere presente che un processo può essere stazionario in senso forte, ma non possedere momenti, viceversa, se i momenti esistono e sono finiti, la stazionarietà in senso *forte* implica la stazionarietà in senso *debole*.
+
+L'unico caso in cui le due definizioni coincidono è quando parliamo di *Processo Gaussiano*, in cui la distribuzione congiunta di un qualunque sottoinsieme finito di elementi del processo è una normale multivariata. Un aspetto favorevole di una distribuzione normale multivariata è che è completamente determinata dai sui primi due momenti: la media e la matrice di covarianza. Se un processo gaussiano è stazionario in senso debole, allora la sua distribuzione congiunta non cambia nel tempo. Di conseguenza, la stazionarietà debole implica automaticamente la stazionarietà forte per un processo gaussiano.
+
+- Ergodicità: condizione che limita la memoria del processo.
+
+  La proprietà di ergodicità definisce la possibilità di utilizzare le informazioni racchiuse nella serie storica per stimare i momenti del processo stocastico sottostante i dati osservati. In un processo ergodico, la memoria del processo è debole su lunghi orizzonti temporali e all’aumentare dell’ampiezza del campione aumenta in modo significativo anche l’informazione in possesso. Al contrario, un processo non ergodico è un processo che ha caratteristiche di persistenza molto eccentuate e tali per cui un segmento del processo, per quanto lungo, non è sufficiente per definire le caratteristiche distributive dell’intero processo.
+
+  Volendo dare una definizione più formale, un processo stocastico stazionario è ergodico se *eventi molto lontani fra loro* possono essere considerati *indipendenti:*
+
+  $$\lim_{n \to \infty} \frac{1}{n} \sum_{k=1}^{n} Cov(X_t, X_{t-k}) = 0$$
+
+  ovvero, la condizione necessaria perchè un processo sia ergodico è che le autocovarianze tendano a zero in modo sufficientemente veloce (cioè il processo non abbia una memoria molto lunga e che quindi al tempo t non sia influenzato da eventi troppo lontani).
+
+Una *serie storica,* invece, è una possibile realizzazione di un processo stocastico (osservazione). Dunque, il processo stocastico è ciò che sta dietro quello che si osserva, ovvero la legge probabilistica che permette alla serie di realizzarsi.
+
+Per valutare le caratteristiche di una serie storiche, come ad esempio il grado di memoria, si ricorre spesso alla *funzione di autocorrelazione (ACF),* definita come
+
+$$\rho(k) = \frac{\gamma(k)}{\gamma(0)} = 
+\frac{\text{Cov}(X_t, X_{t-k})}{\sqrt{\text{Var}(X_t) \cdot \text{Var}(X_{t-k})}} = 
+\frac{\text{Cov}(X_t, X_{t-k})}{\text{Var}(X_t)} = 
+\text{Corr}(X_t, X_{t-k})$$
+
+La ACF fornisce una misura della dipendenza lineare tra le osservazioni al tempo t e quelle al *ritardo* o *Lag k=1,2,,3,...,* ovvero indica di quanto "si sta spostando indietro" una serie temporale per confrontarla con se stessa.
+
+$\rho(k) = \rho(-k)$, vuol dire che la ACF è una funzione pari (simmetrica rispetto a zero). Per questo motivo la ACF viene plottata solamente per lag positivi (lo stesso vale la funzione di autocovarianza, $\gamma(k) = \gamma(-k)$. $$-1 \leq \rho(k) \leq 1$$
+
+```{r, echo = FALSE, fig.cap = "ACF dei rendimenti S\\&P500"}
+library(quantmod)
+dataset <- getSymbols("^GSPC", src = "yahoo", from = "2023-01-01", to = "2025-01-01", auto.assign = TRUE)
+
+prezzi_chiusura <- Cl(GSPC)
+# Calcolo i log-rendimenti
+log_rendimenti <- diff(log(prezzi_chiusura))
+log_rendimenti <- na.omit(log_rendimenti)
+
+acf(log_rendimenti, main = "ACF rendimenti S&P500", lag.max = 30)
+```
+
+Nell'esempio, è stata rappresentata l'ACF dei log-rendimenti dell'indice S&P500, dove le correlazioni ai vari ritardi non superano mai le bande di confidenza al 95% (linee blu tratteggiate pari a $\pm \frac{1.96}{\sqrt{n}}$), il che suggerisce che nessun lag presenta correlazioni statisticamente significative, confermando che i rendimenti dell'S&P 500 si comportano come rumore bianco (come si vedrà tra poco), coerentemente con l'ipotesi di mercato efficiente.
+
+Considerata una serie storica $$x_t$$ con t = 0,1,...,n , si suppone che questa sia composta da un *segnale* latente (non direttamente osservabile) e da una componente di *errore* imprevedibile:
+
+$x_t = \text{signal} + \text{random error}$
+
+Un processo White Noise è un processo stocastico che rappresenta una sequenza di variabili aleatorie indipendenti a media nulla, varianza costante e $$Cov(X_t, X_{t+k}) = 0 \quad \forall \quad k \neq 0,$$ per cui :
+
+$$\rho(k) = 1 \text{ per } k = 0$$
+
+$$\rho(k) = 0 \text{ per } k \neq 0$$
+
+In genere si denota con
+
+$$X_t \sim \text{WN}(0, \sigma^2)$$ per indicare processi white noise (WN) incorrelati
+
+$$X_t \sim \text{iid}(0, \sigma^2)$$ per processi WN indipendenti e identicamente distribuiti
+
+$$X_t \sim \text{GWN}(0, \sigma^2)$$ per processi WN iid con distribuzione Gaussiana
+
+Dunque, un processo White Noise viene utilizzato come *benchmark* per valutare se la componente di errore di un modello statistico è puramente casuale. Se i *residui* (errori) si comportano come un processo White Noise, significa che il modello ha spiegato correttamente tutta la parte sistematica dei dati e ciò che rimane è puro rumore casuale.
+
+Per quanto riguarda le componenti di una serie storica:
+
+- $T_t$ componente tendenziale-ciclica di lungo periodo (trend)
+- $S_t$ componente stagionale
+- $e_t$ componente random
+
+possiamo considerare un modello
+
+- additivo $x_t = T_t + S_t + e_t$
+- moltiplicativo $x_t = T_t \times S_t \times e_t$
+
+Il modello moltiplicativo può essere ricondotto ad un modello additivo applicando una trasformazione logaritmica dei dati osservati. Infatti:
+
+$$\log(x_t) = \log(T_t) + \log(S_t) + \log(e_t)$$
+
+La scelta se applicare un modello additivo o moltiplicativo spesso dipende dai dati a disposizione: in genere, quello moltiplicativo è adatto nei casi in cui le fluttuazioni stagionali aumentano (diminuiscono) proporzionalmente con l'aumento (diminuzione) del livello della serie (*trend*)
+
+Indipendentemente dalla specificazione scelta, la valutazione del modello scelto si basa sulle stime $\hat{T}_t$, $\hat{S}_t$ e $\hat{e}_t$
+
+Se $\hat{e}_t \sim WN(0, \sigma^2_{\hat{e}})$, cioè i residui del modello sono una realizzazione White Noise, allora vuol dire che il modello è in grado di separare correttamente il segnale dal rumore
+
+## Processi stocastici per serie storiche stazionarie
+
+### Processi stocasti Moving Average MA(q)
+
+Un processo moving average di ordine q, MA(q), è definito come
+
+$$X_t = \mu + e_t + \theta_1 e_{t-1} + \theta_2 e_{t-2} + \ldots + \theta_q e_{t-q}
+\qquad \text{con} \quad e_t \sim WN(0, \sigma_e^2)$$
+
+dove $$\quad e_t \sim WN(0, \sigma_e^2)$$ indica un processo White Noise a media nulla e varianza $\sigma_e^2$
+
+Per un MA(q), risultano
+
+- Valore atteso: $E(X_t) = \mu$
+
+- Varianza: $\gamma(0) = Var(X_t) = (1 + \theta_1^2 + \theta_2^2 + \ldots + \theta_q^2)\sigma_e^2$
+
+- Autocovarianza:
+
+$$\gamma(k) = \begin{cases}
+\theta_k + \theta_1\theta_{k+1} + \theta_2\theta_{k+2} + \ldots + \theta_{q-k}\theta_q 
+& \text{for} \quad k = 1, 2, \ldots, q \\
+0 & \text{for} \quad k > q
+\end{cases}$$
+
+- Autocorrelazione:
+
+$$\rho(k) = \begin{cases}
+\dfrac{\theta_k + \theta_1\theta_{k+1} + \theta_2\theta_{k+2} + \ldots + \theta_{q-k}\theta_q}
+{1 + \theta_1^2 + \theta_2^2 + \ldots + \theta_q^2}
+& \text{for} \quad k = 1, 2, \ldots, q \\
+0 & \text{for} \quad k > q
+\end{cases}$$
+
+Un processo MA(q) è *sempre stazionario in senso debole o in covarianza* e l'ACF decade a zero al lag $q+1$. È importante sottolineare che i processi MA(q) soffrono di problemi di invertibilità: se ad esempio si considerassero due processi MA(1) \begingroup \setlength{\abovedisplayskip}{4pt} \setlength{\belowdisplayskip}{4pt} $$X_t = \mu_X + e_t + \theta e_{t-1}
+\qquad \text{e} \qquad
+Y_t = \mu_Y + e_t + \theta^* e_{t-1}
+\qquad \text{con} \qquad
+\theta^* = \frac{1}{\theta}$$ \begingroup \setlength{\abovedisplayskip}{4pt} \setlength{\belowdisplayskip}{4pt} Allora $\rho_X(1) = \dfrac{\tfrac{1}\theta}{1+\tfrac{1}\theta^2}$ e $\rho_Y(1) = \dfrac{\theta^*}{1+\theta^{*2}}$, ma \begingroup \setlength{\abovedisplayskip}{4pt} \setlength{\belowdisplayskip}{4pt} $$\rho_Y(1) = 
+ \dfrac{\theta}{1 + \theta^2} 
+= \rho_X(1)
+\qquad \text{quindi l'autocorrelazione al lag 1 è identica}$$ \begingroup \setlength{\abovedisplayskip}{4pt} \setlength{\belowdisplayskip}{4pt} Due MA(1), con parametri l'uno il reciproco dell'altro, presentano la stessa ACF
+
+```{r, echo=FALSE, fig.cap="ACF MA(1) Θ=0.3", fig.cap="ACF MA(1) con Θ=0.6, fig.width=8, fig.height=3.5" }
+library(forecast)
+ma1.sim <- arima.sim(n=500, list(ma=0.3))
+ma1.sim2 <- arima.sim(n=500, list(ma=0.6))
+par(mfrow=c(1,2), mar=c(4,4,4,4))
+acf(ma1.sim, main = expression(paste("ACF MA(1) con ", theta, "=0.3")))
+acf(ma1.sim2, main = expression(paste("ACF MA(1) con ", theta, "=0.6")))
+
+```
+
+Per ovviare a tale problema di invertibilità occorre imporre dei vincoli. Per un MA(1) il vincolo richiesto per garantire l’invertibilità è \|θ\| \< 1. Un MA(2) è invertibile se sono rispettate le seguenti
+
+$$\begin{cases}
+\theta_1 + \theta_2 > -1 \\
+\theta_1 - \theta_2 < +1 \\
+-1 < \theta_2 < +1
+\end{cases}$$
+
+Per la verifica della invertibilità di un MA(q), con $q > 2$ si sfruttano le funzionalità implementate nella funzione `polyroot()` di R.
+
+Un processo MA(q) può essere inoltre rappresentato tramite l'*operatore ritardo* $L$ (*Backshift o lag operator*) come
+
+$$X_t = \mu + (1 + \theta_1 L + \theta_2 L^2 + \ldots + \theta_q L^q) e_t$$
+
+L'*operatore ritardo* (*L*) è uno strumento che serve a spostare indietro nel tempo l'indice di una variabile casuale, trasformando equazioni alle differenze complesse in semplici polinomi algebrici.
+
+Sia $\Theta(L) = (1 + \theta_1 L + \theta_2 L^2 + \ldots + \theta_q L^q)$ il polinomio caratteristico del processo MA(q), la verifica della condizione di invertibilità equivale a verificare che tutte le $q$ radici dell'equazione caratteristica
+
+$$1 + \theta_1 z + \theta_2 z^2 + \ldots + \theta_q z^q = 0$$
+
+siano esterne al cerchio di radice unitaria, ovvero $|z_i|_{i=1,\ldots,q} > 1$
+
+### Processi stocastici Autoregressivi AR(p)
+
+Un altro tipo di processi stocastici stazionari sono i *processi autoregressivi di ordine p*, indicati con *AR(p)* $$X_t = c + \phi_1 X_{t-1} + \phi_2 X_{t-2} + \ldots + \phi_p X_{t-p} + e_t$$
+
+dove $c$ è una costante a valori in $\mathbb{R}$, $\phi_i$ sono i coefficienti del modello, e $e_t \sim WN(0, \sigma^2_e)$.
+
+In questo tipo di processi stocastici, la variabile al tempo t è influenzata non solo dalla componente di rumore $e_t$, ma anche dai valori assunti dalla variabile stessa in tempi precedenti, fino al lag p.
+
+Per un AR(p) stazionario in covarianza, risultano:
+
+- Valore atteso: $E(X_t) = \mu = \dfrac{c}{1 - \phi_1 - \phi_2 - \ldots - \phi_p}$
+- Varianza: $Var(X_t) = \gamma(0) = \phi_1\gamma(1) + \phi_2\gamma(2) + \ldots + \phi_p\gamma(p) + \sigma^2_e$
+- Autocovarianza: $Cov(X_t, X_{t-k})$\
+  $\gamma(k) = \phi_1\gamma(k-1) + \phi_2\gamma(k-2) + \ldots + \phi_p\gamma(k-p)$ per $k = 1, 2, \ldots$
+- Autocorrelazione: $Cor(X_t, X_{t-k})$\
+  $\rho(k) = \phi_1\rho(k-1) + \phi_2\rho(k-2) + \ldots + \phi_p\rho(k-p)$ per $k = 1, 2, \ldots$\
+  Tali equazioni sono anche note come *equazioni di Yule-Walker*
+- Sfruttando $\rho(k) = \dfrac{\gamma(k)}{\gamma(0)}$, possiamo scrivere la varianza di un AR(p) come$$\gamma(0) = \dfrac{\sigma^2_e}{1 - \phi_1\rho(1) - \phi_2\rho(2) - \ldots - \phi_p\rho(p)}$$
+Affinché i momenti primo e secondo esistano finiti è richiesto che $|\phi| < 1$
+Tale condizione garantisce la *stazionarietà in senso debole* di un processo AR(1).
+
+```{r, echo=FALSE, fig.cap= "ACF AR(1) Φ=0.8", fig.cap="ACF AR(1) Φ=0.2",fig.cap="ACF AR(1) Φ=-0.5"}
+ar1_sim1 <- arima.sim(n=500, list(ar=0.8))
+ar1_sim2 <- arima.sim(n=500, list(ar=0.2))
+ar1_sim3 <- arima.sim(n=500, list(ar=-0.5))
+par(mfrow=c(2,2), mar=c(4,4,4,4))
+acf(ar1_sim1, main = "ACF AR(1) Φ=0.8")
+acf(ar1_sim2, main ="ACF AR(1) Φ=0.2")
+acf(ar1_sim3, main = "ACF AR(1) Φ=-0.5")
+```
+
+- Quindi, poiché $\rho(k) = \phi^k$, per $|\phi| < 1$ l'ampiezza della funzione di autocorrelazione diminuisce in modo esponenziale all'aumentare del numero di lag $k$
+
+- se $0 < \phi < 1$ le autocorrelazioni teoriche sono tutte positive
+
+- se $-1 < \phi < 0$ l'autocorrelazione al lag 1 è negativa e i segni delle autocorrelazioni a ritardi successivi si alternano da positivi a negativi, con le loro grandezze che diminuiscono esponenzialmente all'aumentare dei ritardi
+
+- Maggiore è il valore di $|\phi|$, maggiore sarà il grado di dipendenza con le osservazioni passate
+
+- Se $|\phi| > 1$ la correlazione a ritardi lontani sarebbe via via maggiore: in questi casi processi AR(1) vengono definiti *esplosivi*
+
+- Se $|\phi| = 1$ i processi vengono definiti *RANDOM WALK.* Questa tipologia di processo presenta elevata persistenza e un lento decadimento della ACF, avente correlazioni significative anche a ritardi lontani.
+
+Mentre per un AR(2) i vincoli di stazionarietà sono i seguenti
+
+$$\begin{cases}
+\phi_1 + \phi_2 < +1 \\
+\phi_2 - \phi_1 < +1 \\
+-1 < \phi_2 < +1
+\end{cases}$$
+
+- Per processi MA(q), la ACF va a zero al lag $q + 1$. Di conseguenza, l'ispezione grafica della ACF può fornirci indicazioni sull'ordine $q$ di un processo MA
+
+- Per processi AR(p), la ACF mostra invece un decadimento esponenziale (per un AR(1) stazionario, ovvero con $|\phi| < 1$, $\rho(k) = \phi^k$) e in questi casi l'ispezione grafica della ACF non fornisce indicazioni sull'ordine $p$ di un processo AR
+
+- Per ovviare a tale limite, si considera la funzione di autocorrelazione parziale (PACF), definita come
+
+$$\phi_{kk} = \text{Corr}(X_t, X_{t-k} | X_{t-1}, X_{t-2}, \ldots, X_{t-k+1})$$
+
+e che rappresenta la correlazione (lineare) tra $X_t$ e $X_{t-k}$ condizionata a $X_{t-1}, X_{t-2}, \ldots, X_{t-k+1}$ (quindi una correlazione valutata al netto dell'influenza delle variabili ritardate comprese tra $t$ e $t - k$)
+
+- Per processi AR(p), la PACF va a zero al lag $p + 1$. Di conseguenza, l'ispezione grafica della PACF può fornirci indicazioni sull'ordine $p$ di un processo AR
+
+```{r, echo=FALSE}
+library(forecast)
+ar1_sim <- arima.sim(n=500, list(ar=0.9))
+par(mfrow=c(1,2), mar=c(4,4,4,4))
+acf(ar1_sim, main ="ACF AR(1) Φ=0.9")
+pacf(ar1_sim, main ="PACF AR(1) Φ=0.9")
+
+```
+
+Inoltre, un processo Autoregressivo può essere sempre rappresentato tramite l'operatore ritardo in questo modo:
+
+$$L^k(X_t) = X_{t-k}$$
+
+Usando tale operatore nel caso di un AR(1), si ottiene
+
+$$X_t = \phi X_{t-1} + e_t$$ $$X_t - \phi X_{t-1} = e_t$$ $$(1 - \phi L)X_t = e_t$$
+
+dove $\Phi(L) = (1 - \phi L)$ rappresenta il *polinomio caratteristico* del processo AR(1)
+
+Il vincolo di stazionarietà per un AR(1) rappresentato in questo modo richiede che la radice dell'*equazione caratteristica* $(1 - \phi z) = 0$ sia esterna al cerchio di raggio unitario, ovvero che $|z| > 1$
+
+Tale condizione è verificata per $|\phi| < 1$
+
+Un processo ARMA di ordine p per la parte autoregressiva e q per quella moving average, che si denota con ARMA(p,q), è dato da
+
+$$X_t = c + \phi_1 X_{t-1} + \phi_2 X_{t-2} + \ldots + \phi_p X_{t-p} + e_t 
++ \theta_1 e_{t-1} + \theta_2 e_{t-2} + \ldots + \theta_q e_{t-q}$$
+
+dove $e_t \sim WN(0, \sigma^2_e)$
+
+- Un processo ARMA è stazionario se la parte AR rispetta i vincoli di stazionarietà
+
+- Un processo ARMA è invertibile se la parte MA rispetta i vincoli di invertibilità
+
+## Processi stocastici NON stazionari
+
+Nel caso di serie storiche non stazionarie, queste possono essere modellate combinando *componenti stocastiche* e *trend deterministici*. Rientrano in questa tipologia i modelli di regressione ARMAX, dove la X indica eventuali *variabili esogene* inserite nel modello come:
+
+- Trend di natura deterministica
+
+- Componenti stagionali di natura deterministica
+
+- Altre variabili esogene
+
+Se ad esempio si prende in considerazione un processo del tipo:
+
+$$X_t = \beta_0 + \beta_1 t + \phi X_{t-1} + e_t + \theta e_{t-1}$$
+
+il quale corrisponde ad una combinazione di un ARMA(1,1) stazionario e invertibile e un trend lineare (t). Processi di questo tipo vengono definiti *Trend-Stationary* in quanto, la serie storica diventa stazionaria dopo la rimozione della componente di trend di natura deterministica. Dunque, La non stazionarietà in media di una serie storica è spesso dovuta a
+
+- presenza di una componente ciclica-tendenziale di lungo periodo (ad esempio un trend lineare)
+
+- stagionalità del fenomeno oggetto di interesse
+
+Un esempio di processo non stazionario è un processo *Random Walk* (puro), il quale è dato da
+
+$$X_t = X_{t-1} + e_t \quad \text{con } e_t \sim WN(0, \sigma^2_e)$$
+
+Assumendo come *condizione iniziale* $X_0 = 0$, sostituendo in maniera ricorsiva le $X_{t-k}$, un RW può essere scritto come somma cumulata di impulsi white noise incorrelati
+
+$$X_t = X_0 + \sum_{i=1}^{t} e_i = \sum_{i=1}^{t} e_i$$
+
+Per un RW, risultano:
+
+- Valore atteso: $E(X_t) = E\left(\sum_{i=1}^{t} e_i\right) = 0$
+
+- Varianza: $\gamma(0) = \text{Var}(X_t) = \text{Var}\left(\sum_{i=1}^{t} e_i\right) =
+  \text{Var}(e_1) + \text{Var}(e_2) + \ldots + \text{Var}(e_t) = t \cdot \sigma^2_e$
+
+- Autocovarianza: $\gamma(t,s) = \text{Cov}(X_t, X_s) = \text{Cov}\left(\sum_{i=1}^{t} e_i,\ 
+  \sum_{j=1}^{s} e_j\right) = \min\{t,s\} \cdot \sigma^2_e \text{ per } t \neq s$
+
+- Autocorrelazione $(t < s)$: $$\rho(t,s) = \frac{\gamma(t,s)}{\sqrt{\gamma(t)\gamma(s)}} = 
+  \frac{t\sigma^2_e}{\sqrt{t\sigma^2_e \cdot s\sigma^2_e}} = \sqrt{\frac{t}{s}}$$
+
+La rappresentazione di un RW puro tramite l'operatore ritardo è data da
+
+$$(1 - L)X_t = e_t$$
+
+da cui emerge, evidentemente, che la differenza tra $X_t$ e $X_{t-1}$ è un processo WN, stazionario per definizione. Nel contesto dell'analisi delle serie storiche, quando si vuole eliminare la componente stocastica da un processo non stazionario, si ricorre all'operazione di differenza ricorsiva tra valori consecutivi nel tempo, questa viene indicata con un operatore *ad hoc* che si indica con $\Delta^d$ dove $d$ indica il numero di volte che viene applicata l'operazione al fine di ottenere un processo stazionario in covarianza:
+
+$$\Delta^d X_t = \Delta(\Delta(\Delta \cdots (X_t))) \quad \text{differenza di ordine } d, 
+\text{ equivalente a } (1-L)^d X_t$$
+
+Nella letteratura scientifica, processi non stazionari come ad esempio un Random Walk, vengono definiti in più modi:
+
+*Unit Root (UR),* ovvero processi a radice unitaria, chiamati così per la presenza della radice unitaria nella risoluzione dell'equazione caratteristica associata alla componente AR.
+
+*DIfference-Stationary (DS)* : processi stazionari in differenza, nel senso che si ottiene un processo stazionario in covarianza una volta applicata l'operazione differenza.
+
+Processi integrati di ordine d: *I(d).* Una volta che la serie è stata differenziata per ottenere un processo stazionario in covarianza, per tornare alla sua forma originale occorre integrare, ossia applicare una somma cumulata.
+
+### Processi ARIMA(p,d,q)
+
+Un processo ARIMA(p,d,q) dove
+
+- $p$ indica l'ordine della parte AR
+- $d$ indica l'ordine di integrazione
+- $q$ indica l'ordine della parte MA
+
+è dato, in forma compatta, da
+
+$$\Phi(L)(1 - L)^d X_t = c + \Theta(L)$$
+
+dove
+
+- $\Phi(L) = (1 - \phi_1 L - \phi_2 L^2 - \ldots - \phi_p L^p)$ è il polinomio caratteristico della componente AR
+
+- $(1 - L)^d$ rappresenta l'ordine di integrazione
+
+- $\Theta(L) = (1 + \theta_1 L + \theta_2 L^2 + \ldots + \theta_q L^q)$ è il polinomio caratteristico della componente MA
+
+I processi ARIMA, possono essere estesi in modo da modellare anche la stagionalità, ovvero quella componente che si ripete ad intervalli regolari nell'unità temporale di riferimento. In questo caso si parla di *Seasonal* ARIMA e si denotano con $\text{SARIMA}(p, d, q) \times (P, D, Q)_S$, la cui rappresentazione è data da
+
+$$\Phi(L)\Phi_S(L^{(S)})(1 - L)^d(1 - L^{(S)})^D X_t = 
+\Theta(L)\Theta_S(L^{(S)})e_t
+\quad \text{con} \quad e_t \sim WN(0, \sigma_e^2)$$
+
+dove
+
+- $\Phi(L)$ è il polinomio caratteristico componente AR non stagionale di ordine $p$
+
+- $\Phi_S(L^S)$ è il polinomio caratteristico componente AR stagionale di ordine $P$
+
+- $\Theta(L)$ è il polinomio caratteristico componente MA non stagionale di ordine $q$
+
+- $\Theta_S(L^S)$ è il polinomio caratteristico componente MA stagionale di ordine $Q$
+
+- $(1 - L)^d$ indica l'ordine $d$ di integrazione ordinario
+
+- $(1 - L^S)^D$ indica l'ordine $D$ di integrazione stagionale tale che
+
+  $\begin{aligned}
+  (1 - L^S)^D X_t &= X_t - X_{t-S \cdot D}
+  \end{aligned}$\$
+
+## Test Diagnostici
+
+### ADF test e KPSS test
+
+Quando si parla di analisi delle serie storiche, un aspetto critico è l'identificazione dell'ordine di integrazione *d* della serie storica osservata. La letteratura scientifica propone diversi test statistici adatti allo scopo, uno di questi è l'*Augmented Dickey-Fuller test* (ADF Test). L'ADF è una tiplogia di test ad una coda che si basa su una procedura sequenziale il cui fine è quello di testare la presenza di una radice unitaria (Φ=1) sulla variabile originale, il che equivale a verificare che *π=0* se si usa la variabile differenziata. L’ipotesi nulla (H0) e l’ipotesi alternativa (H1) della verifica d’ipotesi per il test ADF sono quindi: \begin{align}
+H_0 &: \pi = 0 \Rightarrow \text{presenza della radice unitaria (DF)} \\
+H_1 &: \pi < 0 \Rightarrow \text{stazionarietà}
+\end{align}
+
+La logica è estesa a modelli che includono termini deterministici (drift e trend) e variabili differenziate ritardate. In particolare, l'ipotesi $H_0 : \pi = 0$ può essere verificata a partire da 3 specificazioni:
+
+*Modello con drift e trend*
+
+$$(D+T) \qquad \Delta X_t = \beta_1 + \beta_2 t + \pi X_{t-1} + 
+\sum_{j=1}^{k} \Delta X_{t-k} + e_t$$
+
+*Modello con drift*
+
+$$(D) \qquad \Delta X_t = \beta_1 + \pi X_{t-1} + 
+\sum_{i=1}^{k} \Delta X_{t-k} + e_t$$
+
+*Modello senza drift e senza trend* $$(N) \qquad \Delta X_t = \pi X_{t-1} + 
+\sum_{i=1}^{k} \Delta X_{t-k} + e_t$$
+
+La procedura sequenziale di test per radici unitarie si articola nei seguenti step:
+
+1.  Stima dei parametri del modello che include Drift, Trend e un numero k di variabili differenziate ritardate.
+
+2.  Verifica della presenza di radici unitarie Se rifiuto di H0 : π = 0, la procedura si interrompe e concludiamo che il processo è TS. Altrimenti passo allo step successivo.
+
+3.  Stima dei parametri del modello che include Drift e un numero k di variabili differenziate ritardate.
+
+4.  Verifica della presenza di radici unitarie Se rifiuto H0 : π = 0, la procedura si interrompe e concludiamo che il processo è TS. Altrimenti passo allo step 5.
+
+5.  Stima dei parametri del modello con k variabili differenziate ritardate.
+
+6.  Verifica della presenza di radici unitarie Se rifiuto H0 : π = 0, concludiamo che il processo è TS Se accetto H0 : π = 0, concludiamo che il processo è DS.
+
+La procedura mira ad individuare l’ordine di integrazione d, quindi testare se un processo è I(d+1) vs I(d), con d = 0, 1, 2, 3, . . .
+
+In genere , nell’applicazione della procedura sequenziale si parte con la verifica I(2) vs I(1), quindi applicando la procedura sulla serie preliminarmente differenziata. Qualora l’ipotesi I(2) viene rigettata, si procede con la verifica I(1) vs I(0) applicando la procedura sequenziale sulla serie originale.
+
+Le statistiche test per le tre specificazioni sono ottenute a partire dalle stime OLS dei modelli. Nello specifico
+
+- Le statistiche test $\tau_i$ si riferiscono alla verifica dell'ipotesi $H_0 : \pi = 0$ (equivalente di un *t*-test) nelle 3 diverse specificazioni e sono ottenute come
+
+$$\tau_i = \frac{\hat{\pi}}{s.e.(\hat{\pi})} \qquad \text{con} \qquad i = 1, 2, 3$$
+
+dove $\hat{\pi}$ indica la stima OLS del parametro e *s.e.* lo standard error
+
+- Le statistiche test $\phi_i$ si riferiscono alla verifica d'ipotesi congiunta, ad esempio $H_0 : \beta_2 = \pi = 0$ (equivalente di un'ANOVA F-type test) e sono ottenute come
+
+$$\phi_i = \frac{\text{RSS(restricted)-RSS(unrestricted)}/r}{\text{RSS(unrestricted)}/(N - s)}
+\qquad \text{con} \qquad i = 1, 2, 3$$
+
+dove RSS(restricted) e RSS(unrestricted) sono le somma dei quadrati dei residui del modello ristretto alla sole variabili differenziate ritardate e del modello completo; $r$ indica il numero di restrizioni; $N$ la dimensione campionaria e $s$ il numero dei parametri del modello completo. La regola di decisione per il sistema di ipotesi è la seguente:
+
+- per τi : se il valore della statistica test è inferiore al valore soglia in corrispondenza del 5° pct, allora rigettiamo l’ipotesi nulla H0 (presenza di radice unitaria) in favore di H1 (assenza di radice unitaria)
+
+- per Φi : se il valore della statistica test è superiore al valore soglia in corrispondenza del 5° pct, allora rigettiamo H0, l’ipotesi sulla significatività congiunta dei termini deterministici βi e di π
+
+Il *KPSS test* invece, viene considerato un test *conservativo,* in quanto a differenza dell'ADF test, assume come H0 che la serie storica sia TS, mentre come H1 che la serie sia DS: $$\begin{cases}
+H_0 : \sigma_\varepsilon^2 = 0 & \text{level o trend stationary (TS), assenza di radici unitarie} \\
+H_1 : \sigma_\varepsilon^2 > 0 & \text{difference stationary (DS), presenza di radici unitarie}
+\end{cases}$$
+
+### Procedura Box & Jenkins
+
+La costruzione di un modello ARIMA adeguato per dati reali si fonda sulla filosofia iterativa proposta da Box e Jenkins (1976). Tale procedura consente di passare dall'osservazione empirica di una serie storica alla specificazione di un modello parsimonioso (il principio di parsimonia tende a preferire il modello che descrive meglio i dati osservati con il minor numero di parametri) e statisticamente valido, strutturandosi in tre stadi sequenziali interconnessi: Identificazione (*Stage 1*), Stima (*Stage 2*) e Controlli Diagnostici (*Stage 3*). Qualora il modello superi la fase di verifica diagnostica, esso viene impiegato per la previsione (*Forecasting*); in caso contrario, l'iter viene reiterato ritornando alla fase iniziale di identificazione.
+
+L'identificazione di un modello ARIMA consiste nella determinazione puntuale di tre ordini fondamentali:
+
+\- $d$: l'ordine di integrazione della serie
+
+\- $p$: l'ordine della componente autoregressiva ($AR$)
+
+\- $q$: l'ordine della componente a media mobile ($MA$).
+
+- La scelta di $d$ si effettua formalmente attraverso l'applicazione sequenziale di test per radici unitarie. Il *Test ADF (Augmented Dickey-Fuller)* viene impiegato per verificare tra processi $I(2)$ vs $I(1)$ e successivamente tra $I(1)$ vs $I(0)$, verificando se la statistica test $\tau_3$ cade nella regione di rifiuto dell'ipotesi nulla $H_0$ (presenza di radice unitaria) a favore dell'alternativa di stazionarietà. Il *Test KPSS* si applica per verificare l'ipotesi nulla $H_0$ di stazionarietà della serie (stazionarietà in livello o trend-stationarity). Per la determinazione degli ordini autoregressivi e a media mobile ($p$ e $q$), una prima indicazione preliminare deriva dall'ispezione congiunta della funzione di autocorrelazione (ACF) e della funzione di autocorrelazione parziale (PACF): per processi $AR(p)$, la ACF decade a zero gradualmente (anche con oscillazioni sinusoidali), mentre la PACF si annulla bruscamente al lag $p+1$ (risultando statisticamente significativa solo per i primi $p$ lag); per processi $MA(q)$, la ACF si annulla al lag $q+1$ (significativa solo per $q$ ritardi), mentre la PACF decade gradualmente; per processi misti $ARMA(p, q)$, sia l'ACF sia la PACF decadono gradualmente a zero. A parità di performance, la coppia p e q andrebbe scelta sulla base del *principio di parsimonia*, cioè preferendo il modello che descrive meglio i dati osservati con il minor numero di parametri. Tale selezione viene guidata dalla minimizzazione dei criteri di informazione:
+
+- *Akaike Information Criterion (AIC):* $$AIC = -2 \cdot \log(ML) + 2k$$ Il quale serve dunque per verificare quali ordini p e q si adattano meglio ai dati osservati
+
+- *Bayesian Information Criterion (BIC):* $$BIC = -2 \cdot \log(ML) + k \cdot \log(n)$$
+
+dove $ML$ rappresenta la verosimiglianza massimizzata del modello, $n$ è la numerosità campionaria e $k$ è il numero totale di parametri stimati ($k = p + q + 2$ se il modello include l'intercetta, $k = p + q + 1$ altrimenti, considerando $p, q, \sigma_e^2$ ed eventuali termini deterministici). Il termine $k$ funge da fattore di penalizzazione.
+
+Lo Stage 2 dice che, definita la struttura $ARIMA(p, d, q)$, la stima dei coefficienti viene condotta massimizzando la funzione di verosimiglianza (ML), tecnica alternativa ai minimi quadrati ordinari (OLS) che individua i valori dei parametri atti a massimizzare la probabilità di generare una traiettoria probabilistica il più vicina possibile ai dati storici osservati. La significatività statistica dei coefficienti stimati ($\hat{\phi}_i, \hat{\theta}_j, \hat{c}$) viene verificata attraverso due criteri equivalenti:
+
+1.  *Intervallo di Confidenza al 95%:* calcolato come $\text{Stima} \pm 2 \cdot \text{s.e.}$
+
+2.  *Verifica d'ipotesi sul singolo parametro:* $$\begin{cases} H_0: \beta = 0 \\ H_1: \beta \neq 0 \end{cases}$$con statistica test data dal rapporto: $$t = \frac{\text{valore stimato} - 0}{\text{standard error della stima}} \sim t_{\nu}$$distribuita asintoticamente come una $t$ di Student con $\nu = n - \text{numero parametri}$ gradi di libertà, rigettando $H_0$ qualora il $p\text{-value} \le 0.05$.
+
+Lo Stage 3 riguarda i *controlli diagnostici sui residui*, dove l'adeguatezza del modello stimato viene verificata analizzando le proprietà della componente residuale: $$\hat{e}_t = X_t - \hat{X}_t$$
+
+Un modello è statisticamente adeguato se i residui soddisfano quattro condizioni:
+
+1.  *Media nulla:* assicura che le stime $\hat{X}_t$ siano corrette e non distorte
+
+2.  *Incorrelazione seriale:* requisito fondamentale per l'impiego previsivo; se violato, occorre ridefinire la fase di identificazione
+
+3.  *Omoschedasticità (varianza costante):* necessaria per una corretta quantificazione dell'incertezza stocastica
+
+4.  *Distribuzione Normale:* condizione auspicabile per garantire la piena validità dell'inferenza statistica
+
+I controlli diagnostici vengono condotti mediante strumenti grafici e test formali d'ipotesi fissando il livello di significatività standard $\alpha = 0.05$
+
+- *Ispezione grafica dei residui:* esame dello scatterplot temporale (per escludere trend, salti di livello o cambi di varianza) e della relativa ACF empirica
+- *Test di Ljung-Box (Box-type test):* verifica la presenza di correlazione seriale nei residui fino al massimo ritardo $K$ $$\begin{cases} H_0: \text{la serie presenta correlazioni nulle (White Noise)} \\ H_1: \text{la serie presenta correlazioni diverse da zero} \end{cases}$$La statistica test è formalizzata come: $$Q = n(n+2) \sum_{k=1}^K \frac{\hat{r}_k^2}{n-k}$$ dove $\hat{r}_k$ è la stima della correlazione campionaria dei residui al lag $k$. Sotto l'ipotesi nulla $H_0$, la statistica $Q$ converge a una distribuzione asintotica $\chi^2_{K-(p+q)}$ *chi-quadrato* con $K - (p+q)$ gradi di libertà. Valori di $p\text{-value} > 0.05$ confermano l'assenza di correlazione residua.
+- *Verifica della Normalità (QQ-Plot e Test di Jarque-Bera):*\
+  Il confronto grafico avviene tramite *Normal Q-Q Plot*, per valutare la normalità di una distribuzione dove i quantili di una variabile vengono messi a confronto con quelli della distribuzione normale di una variabile teorica avente la stessa media e la stessa deviazione standard. Formalmente, il *Test di Jarque-Bera* valuta congiuntamente l'indice di asimmetria ($\hat{S}$) e di curtosi ($\hat{K}$): $$\begin{cases} H_0: \text{la distribuzione dei dati è Normale } (S=0, K=3) \\ H_1: \text{la distribuzione dei dati non è Normale} \end{cases}$$ La statistica test è definita da: $$JB = \frac{n}{6} \left[ \hat{S}^2 + \frac{1}{4}(\hat{K}-3)^2 \right] \sim \chi^2_2$$ con $\hat{S} = \frac{1}{n}\sum_{t=1}^n \frac{(x_t - \hat{\mu})^3}{\hat{\sigma}^3}$ e $\hat{K} = \frac{1}{n}\sum_{t=1}^n \frac{(x_t - \hat{\mu})^4}{\hat{\sigma}^4}$. Sotto $H_0$, $JB$ si distribuisce asintoticamente come un Chi-quadrato con 2 gradi di libertà. Un $p\text{-value} > 0.05$ attesta la gaussianità dei residui.
+
+La valutazione di una verifica di ipotesi viene condotta valutando la significatività statistica dell’ipotesi nulla (H0). Significatività statistica significa che la statistica test cade nella regione di rifiuto per H0, ovvero nella/e coda/e della distribuzione asintotica prevista per la statistica test sotto H0 Tale valutazione viene spesso condotta tramite il p-value, un numero tra 0 e 1 che misura l’evidenza dei dati a favore di H0. Per ogni verifica d’ipotesi, dopo aver constatato qual’è l’ipotesi nulla H0, la regola generalmente usata è fissare il livello di significatività α = 0.05: se p-value \> 0.05, non ci sono evidenze contro H0, quindi accetto l’ipotesi nulla, se p-value ≤ 0.05, ci sono evidenze contro H0, quindi rifiuto l’ipotesi nulla. Quando 0.05 ≤ p-value ≤ 0.10 occorre però essere prudenti nell’accettare H0.
+
+## Forecasting
+
+Sia $X_1, X_2, \ldots, X_{t-1}, X_t$ una serie storica osservata negli istanti temporali $t$
+
+Sia $\ell > 0$ il *lead time;* la previsione puntuale all'istante $t + \ell$ verrà indicata con $\widehat{X}_t(\ell)$
+
+In particolare, la *previsione puntuale* sarà stimata come
+
+$$\widehat{X}_t(\ell) = E[X_{t+\ell} \mid X_1, X_2, \ldots, X_t]$$
+
+Oltre alla previsione puntuale però, è importante conoscere anche la precisione della stima. Questa valutazione sarà condotta valutando l'*errore di previsione* dato da
+
+$$e_t(\ell) = X_{t+\ell} - \widehat{X}_t(\ell)$$
+
+In particolare, verranno valutati
+
+- il valore atteso $E(e_t(\ell))$ (che deve essere nullo per uno stimatore non distorto)
+
+- la varianza $Var(e_t(\ell))$ dell'errore di previsione
+
+Nel caso in cui l'errore di previsione abbia una forma distribuitiva Normale, l'*intervallo di confidenza* per la previsione al livello $(1 - \alpha) \cdot 100\%$ è costruito come
+
+$$\widehat{X}_t(\ell) \pm z_{1-\alpha/2} \cdot \sqrt{Var(e_t(\ell))}$$
+
+dove $z_{1-\alpha/2}$ è il quantile di una Normale standard (ad esempio per $\alpha = 0.05$, $z_{1-\alpha/2} = 1.96$)
+
+Se ad esempio venisse preso un processo Random Walk con drift
+
+$$X_t = X_{t-1} + \theta_0 + e_t \quad \text{con} \quad e_t \sim WN(0, \sigma^2_e)$$
+
+In generale, per $\ell > 0$
+
+$$\begin{aligned}
+\widehat{X}_t(\ell) &= \widehat{X}_t(\ell - 1) + \theta_0 \\
+&\quad \text{e operando tramite sostituzioni ricorsive} \\
+&= X_t + \ell\theta_0
+\end{aligned}$$
+
+l*'errore di previsione* è dato da
+
+$$\begin{aligned}
+e_t(\ell) &= X_{t+\ell} - \widehat{X}_t(\ell) \\
+&\quad \text{procedendo con sostituzioni ricorsive per } X_{t+\ell} \text{ fino a } X_t \\
+&= X_t + \ell\theta_0 + e_{t+1} + e_{t+2} + \ldots + e_{t+\ell} - X_t - \ell\theta_0 \\
+&= \sum_{i=1}^{\ell} e_{t+i}
+\end{aligned}$$
+
+da cui
+
+- $E(e_t(\ell)) = 0$
+
+- $Var(e_t(\ell)) = \ell\sigma^2_e$
+
+Per processi stazionari invece, come ad esempio un ARMA(1,1),
+
+1.  la previsione puntuale è
+
+$$\widehat{X}_t(\ell) = \begin{cases}
+\mu + \phi(X_t - \mu) + \theta e_t & \text{per} \quad \ell = 1 \\
+\mu + \phi\Big(\widehat{X}_t(\ell - 1) - \mu\Big) & \text{per} \quad \ell > 1
+\end{cases}$$
+
+2.  L'errore di previsione avrà valore atteso
+
+$$E(e_t(\ell)) = 0 \quad \forall \quad \ell > 0$$
+
+3.  La varianza dell'errore di previsione
+
+$$Var(e_t(\ell)) = \begin{cases}
+\sigma^2_e & \text{per} \quad \ell = 1 \\[10pt]
+\sigma^2_e(1 + (\phi + \theta)^2) & \text{per} \quad \ell = 2 \\[10pt]
+\approx \gamma_0 = Var(X_t) & \text{per} \quad \ell \to +\infty \quad 
+\end{cases}$$
+
+Per quanto riguarda la previsione di processi ARIMA(p,d,q), la procedura è leggermente più lunga e complessa e si articola in tre passi
+
+1.  Riscrivere l’equazione del modello ARIMA in modo tale che $X_t$ sia dalla parte sinistra e tutti gli altri termini sulla destra
+
+2.  Riscrivere l’equazione sostituendo t con t + $\ell$
+
+3.  Fissato $\ell$, sulla parte destra dell’equazione, sostituire le osservazioni $X_{t+\ell}$ future con la loro previsione $\widehat{X}_{t+\ell}$, gli errori futuri $e_t(\ell)$ con zero, e gli errori fino al tempo t con i corrispondenti residui del modello, che indicheremo con $\hat{e}_t(\ell)$
+
+## GARCH (q,p)
+
+Sia $Y_t$ una serie storica di interesse
+
+La varianza di $Y_t$ condizionata ai valori osservati in precedenza $Y_{t-1}, Y_{t-2}, \ldots$ misura l'incertezza della deviazione di $Y_t$ dalla sua media condizionale $E(Y_t \mid Y_{t-1}, Y_{t-2}, \ldots)$
+
+Se il Data Generating Process di $Y_t$ seguisse un modello ARMA, la stima della varianza condizionale (one-step-ahead) sarebbe costante nel tempo e proporzionale alla varianza del termine di rumore. In pratica, la varianza condizionale (one-step-ahead) può variare in funzione dei valori passati del processo e, pertanto, può essere considerata un processo stocastico. La volatilità di una serie temporale finanziaria indica la varianza (o la deviazione standard a seconda del contesto) associata alla serie dei rendimenti. Volatilità è sinomimo di incertezza (una varianza maggiore implica maggiore incertezza, maggiore volatilità). Può inoltre accadere che a periodi di quiete si alternino periodi caratterizzati da maggiore turbolenza. Tale caratteristica è indicata in letteratura come *volatility clustering*. Tuttavia, il volatility clustering osservato indica che i rendimenti potrebbero non essere indipendenti e identicamente distribuiti (iid), altrimenti la varianza sarebbe costante nel tempo. Ciò significa che occorre distinguere tra serie storiche a ritardi non correlati (linearmente) da quelle a ritardi indipendenti. Per farlo occorre tenere presente che per serie storiche iid, qualsiasi trasformazione non lineare dei dati preserverebbe l’indipendenza e anche la correlazione lineare. Se i log-rendimenti fossero iid allora lo sarebbero anche i log-rendimenti presi in valore assoluto o al quadrato. Pertanto, se evidenze contro l’ipotesi iid possono essere ottenute analizzando la ACF e la PACF dei rendimenti assoluti o al quadrato.L’ispezione visiva della ACF e della PACF può essere supportata da una verifica d’ipotesi formale utilizzando il *test di McLeod*, dove l’output del test è un grafico in cui sono riportati i p-value del test usando differenti lag. I p-value \< 0.05 portano al rifiuto dell’ipotesi nulla di assenza di correlazione seriale. La forma distributiva dei log-rendimenti può essere valutata tramite un QQ plot, il quale suggerisce che la distribuzione dei log-rendimenti ha code più spesse di quelle di una distribuzione normale, il che porta alla statistica del test di normalità di Jarque-Bera, dove un p-value \< 0.01 porta al rifiuto dell'ipotesi nulla di normalità. I modelli ARCH/GARCH sono stati sviluppati per modellare e analizzare serie storiche che presentano queste caratteristiche. Sebbene però i modelli ARCH, nel corso del tempo sono risultati poco parsimoniosi, ne è stato derivato un modello nuovo che tentasse di superare le limitazioni di quello precedente denominato *Generalized AutoRegressive Conditional Heteroscedasticity* di ordine q e p, GARCH(q,p), ed è dato da $$\begin{split}
+\sigma^2_{t|t-1} = \, & \omega + \beta_1\sigma^2_{t-1|t-2} + \ldots 
++ \beta_p\sigma^2_{t-p|t-p-1} \\
+& + \alpha_1 r^2_{t-1} + \alpha_2 r^2_{t-2} + \ldots + \alpha_q r^2_{t-q}
+\end{split}$$ dove $\omega$, $\beta_i$ e $\alpha_i$ sono i parametri incogniti da stimare e sono vincolati ad essere non negativi per garantire la non negatività delle stime della varianza condizionale. L'identificazione dell'ordine di un GARCH è agevolata rappresentando le varianze condizionali in termini di rendimenti al quadrato sfruttando le quantità
+
+$$\eta_t = r^2_t - \sigma^2_{t|t-1}$$
+
+che sono una sequenza di v.a. incorrelate a media nulla, con $\eta_t$ incorrelata con $r^2_t$. Sostituendo $\sigma^2_{t|t-1} = r^2_t - \eta_t$ nell'equazione precedente abbiamo
+
+$$\begin{split}
+r^2_t = \, & \omega + (\beta_1 + \alpha_1)r^2_{t-1} + \ldots + 
+(\beta_{\max(p,q)} + \alpha_{\max(p,q)})r^2_{t-\max(p,q)} \\
+& + \eta_t - \beta_1\eta_{t-1} - \ldots - \beta_p\eta_{t-p}
+\end{split}$$
+
+dove $\beta_k = 0$ per $k > p$ e $\alpha_k = 0$ per $k > q$.
+
+Questo fornisce una rappresentazione ARMA(max(p,q), p) per un modello GARCH(q,p) per i rendimenti al quadrato. Pertanto, per l'identificazione degli ordini $p$ e $\max(p,q)$ di un GARCH, si può applicare le stesse procedure di identificazione sviluppate per i modelli ARMA. Assumendo che i rendimenti siano debolmente stazionari, prendendo i valori attesi di entrambi i lati dell'equazione dei rendimenti al quadrato si ottiene
+
+$$\sigma^2 = \omega + \sigma^2 \sum_{i=1}^{\max(p,q)} (\beta_i + \alpha_i)$$
+
+da cui, la stima della *varianza incondizionata* (*long-run*) è data da
+
+$$\sigma^2 = \frac{\omega}{1 - \sum_{i=1}^{\max(p,q)} (\beta_i + \alpha_i)}$$
+
+che risulta finita se
+
+$$\sum_{i=1}^{\max(p,q)} (\beta_i + \alpha_i) < 1 
+\quad \text{con } \alpha_i \geq 0 \text{ e } \beta_i \geq 0$$
+
+la condizione è necessaria e sufficiente per garantire la stazionarietà in senso debole di un processo GARCH(q,p). La quantità
+
+$$P = \sum_{i=1}^{\max(p,q)} (\beta_i + \alpha_i)$$
+
+misura la *persistenza* della volatilità; maggiore (vicino a 1) è $P$, maggiore sarà la memoria del processo di varianza condizionale. $P$ esprime quindi di quanto la volatilità al tempo $t$ dipende da quella passata
+
+- l'asimmetria (skewness) di un GARCH è pari a 0
+
+- anche se $\varepsilon_t \sim N(0,1)$, un GARCH ha una curtosi più elevata di una Normale standard, il che implica che ha code più pesanti per un ARCH(q). La persistenza sarà calcolata come somma degli $\alpha_i$. Per quanto riguarda le previsioni h-step-ahead della varianza condizionale $\sigma^2_{t+h|t}$, viene utilizzata l'equazione del GARCH(q,p) andando a sostituire, per $h > p$, $\sigma^2_{t+h-1|t}$ e $r^2_{t+h-1|t}$ con le stime $\hat{\sigma}^2_{t+h-1|t}$, queste ultime ottenute in maniera ricorsiva
+
+Considerando un GARCH(q,p), le previsioni saranno
+
+$$\begin{aligned}
+\text{In general, for } h>1 \quad & \hat{\sigma}^2_{t+h|t} = \omega + \alpha\hat{\sigma}^2_{t+h-1|t} + \beta\hat{\sigma}^2_{t+h-1|t}
+\end{aligned}$$
+
+Si osservi che nel caso di un GARCH(1,1), la previsione per $h = 1$ è
+
+$$\hat{\sigma}^2_{t+1|t} = (1 - \alpha - \beta)\sigma^2 + \alpha r^2_t + \beta\sigma^2_{t|t-1}$$
+
+ovvero, la stima one-step-ahead della varianza condizionale è una media pesata tra la varianza incondizionata, il valore corrente del rendimento al quadrato e la stima corrente della varianza condizionata. Prima di accettare un modello e di interpretarne i risultati, è essenziale verificare se esso sia specificato correttamente, ovvero se le ipotesi di base del modello sono supportate dai dati.Se alcune ipotesi chiave del modello sembrano essere violate, è necessario specificare un nuovo modello, adattarlo e verificarlo nuovamente fino a quando non si trova un modello che fornisca un adattamento adeguato ai dati (seguendo un po' la filosofia Box e Jenkins vista per gli ARIMA). I *residui standardizzati*(i residui standardizzati sono ottenuti dividendo i residui per la deviazione standard condizionale stimata) si definiscono come
+
+$$\hat{\varepsilon}_t = \frac{r_t}{\hat{\sigma}_{t|t-1}}$$
+
+che, nel caso in cui il modello sia correttamente specificato, devono essere approssimativamente *iid*
+
+Come per gli ARIMA,verranno applicati test diagnostici sui residui standardizzati per
+
+- verificare l'assenza di correlazione seriale
+
+- valutare l'adeguatezza della forma distributiva assunta in fase di specificazione del modello (ad esempio normale, t student, etc)
+
+## Modelli Multivariati
+
+Nello studio congiunto di due serie storiche $X_t$ e $Y_t$, l'analisi della semplice correlazione campionaria lineare istantanea (contemporanea) non è sufficiente a descrivere le dinamiche temporali, in quanto l'effetto di una variabile sull'altra può manifestarsi dopo alcuni ritardi temporali (*lag*).
+
+Per misurare la dipendenza lineare tra due serie storiche a diversi ritardi temporali, si definisce la *funzione di cross-correlazione campionaria (CCF)*:
+
+$$\rho_k(X, Y) = \frac{\sum_t (X_t - \bar{X})(Y_{t-k} - \bar{Y})}
+{\sqrt{\sum_t (X_t - \bar{X})^2} \sqrt{\sum_t (Y_t - \bar{Y})^2}}, 
+\quad k = -T,..., -2, -1, 0, +1, +2,...,+T$$
+
+- Per $k = 0$, $\rho_0(X, Y)$ quantifica la correlazione contemporanea al tempo $t$.
+- Per $k > 0$, $\rho_k(X, Y)$ stima l'impatto ritardato di $Y_{t-k}$ su $X_t$.
+- Per $k < 0$, fornisce la relazione tra i valori passati di $X$ e i valori correnti di $Y$.
+- Se $X_t = Y_t$, la CCF coincide con la funzione di autocorrelazione univariata ($ACF$).
+
+Nell’analisi di serie storiche multivariate vi è il rischio di incorrere in stime di correlazioni insensate (spurie), ovvero correlazioni che risultano statisticamente significative, ma che di fatto non lo sono. L'uso degli intervalli di confidenza standard al 95% ($\pm 1.96/\sqrt{n}$) per verificare la significatività della CCF presuppone che entrambe le variabili siano processi White Noise incorrelati.
+
+Quando le serie $X_t$ e $Y_t$ mostrano forte autocorrelazione interna, la varianza teorica della cross-correlazione tra due processi ARMA(p,q) stazionari risulta pari a:
+
+$$\text{Var}(\rho_k(X, Y)) \approx \frac{1}{n} \left[ 1 + 2 \sum_{j} \rho_j(X)\rho_j(Y) \right]$$
+
+Nel caso specifico di due $AR(1)$ con parametri $\phi_X$ e $\phi_Y$ vicini a 1, la varianza diventa:
+
+$$\text{Var}(\rho_k(X, Y)) = \frac{1 + \phi_X \phi_Y}{n(1 - \phi_X \phi_Y)}$$
+
+Tale quantità non converge a $1/n$ ma diverge, determinando stime della CCF artificialmente gonfiate e statisticamente significative anche in assenza di qualsiasi reale legame economico (fenomeno della *correlazione spuria*).
+
+Per ristabilire la corretta varianza asintotica $1/n$ e testare l'effettiva significatività della CCF, si applica la procedura di *Prewhitening*, volta ad annullare l'autocorrelazione interna di una delle due serie:
+
+1.  Si identifica e stima un modello $\text{ARIMA}(p, d, q)$ sulla prima serie $X_t$ in modo che i residui $\hat{e}_{X,t}$ siano un processo White Noise:
+
+$$\Phi_X(L)(1 - L)^d X_t = \Theta_X(L) e_{X,t} \implies \hat{e}_{X,t} \sim WN(0, \sigma^2)$$
+
+2.  Si filtra la serie $Y_t$ applicando lo stesso identico operatore polinomiale stimato per $X_t$, ricavando i residui trasformati $\hat{e}_{Y,t}$:
+
+$$\hat{e}_{Y,t} = \frac{\Phi_X(L)(1 - L)^d}{\Theta_X(L)} Y_t$$
+
+3.  Si calcola la cross-correlazione campionaria tra i due vettori di residui, $\rho_k(\hat{e}_X, \hat{e}_Y)$. Poiché $\hat{e}_{X,t}$ è un rumore bianco, le bande di confidenza $\pm 1.96/\sqrt{n}$ ritornano valide, consentendo di identificare la vera struttura dei ritardi temporali non spuria tra le due variabili.
+
+Però, se una delle serie è I(d) con d \> 0, entrambe devono essere differenziate d volte, anche se una delle due dovesse essere I(0). Inoltre, il filtraggio nello step 2, non assicura che i residui di Yt siano incorrelati. Tuttavia questo non costituisce un problema, in quanto ciò che conta è che solo una delle 2 variabili sia WN
+
+### Il Test di Granger
+
+Il test di causalità Granger valuta se i valori passati di una variabile $x_t$ possiedono potere predittivo incrementale per la previsione di $y_t$, oltre all'informazione già contenuta dai ritardi di $y_t$ stesso (sostanzialmente serve per determinare se una serie temporale $x_t$ può migliorare la previsione di un’altra serie temporale $y_t$).
+
+Formalmente, si confrontano due modelli autoregressivi:
+
+- *Modello ristretto (senza ritardi di* $x_t$)*:*
+
+$$y_t = \alpha_0 + \sum_{i=1}^{p} \beta_i y_{t-i} + \varepsilon_t$$
+
+- *Modello non ristretto (con ritardi di* $x_t$):
+
+$$y_t = \alpha_0 + \sum_{i=1}^{p} \beta_i y_{t-i} + \sum_{j=1}^{q} \gamma_j x_{t-j} + \varepsilon_t$$
+
+Il sistema di ipotesi è:
+
+$$\begin{cases}
+H_0 : \gamma_1 = \gamma_2 = \cdots = \gamma_q = 0 & \quad (x_t \text{ non causa nel senso di Granger } y_t) \\
+H_1 : \exists \, \gamma_j \neq 0                  & \quad (x_t \text{ causa nel senso di Granger } y_t)
+\end{cases}$$
+
+La verifica statistica si basa sul test $F$ di Fisher:
+
+$$F = \frac{(RSS_r - RSS_u)/q}{RSS_u/(N - p - q - 1)} \sim \mathcal{F}(q,\, N - p - q - 1)$$
+
+dove $RSS_r$ e $RSS_u$ rappresentano la somma dei quadrati dei residui del modello ristretto e non ristretto rispettivamente, e $N$ è la dimensione campionaria (numero di osservazioni). La corretta applicazione richiede che le serie siano stazionarie e che il set informativo sia adeguatamente specificato.
+
+### Modelli VAR e VECM
+
+Per un vettore di $k$ serie stazionarie $Y_t = (y_{1t}, y_{2t}, \ldots, y_{kt})'$, il modello $\text{VAR}(p)$ estende il concetto di autoregressione univariata trattando tutte le variabili come endogene in modo simmetrico:
+
+$$Y_t = C D_t + A_1 Y_{t-1} + A_2 Y_{t-2} + \cdots + A_p Y_{t-p} + u_t$$
+
+dove:
+
+- $A_i$ sono matrici di coefficienti di dimensione $(k \times k)$ per ciascun ritardo $i = 1, \ldots, p$;
+
+- $D_t$ è il vettore contenente i termini deterministici (intercetta, trend lineare, stagionalità) associato alla matrice di parametri $C$;
+
+- $u_t \sim WN(0, \Sigma_u)$ è un vettore di innovazioni White Noise $k$-dimensionale con matrice di covarianza contemporanea $\Sigma_u$.
+
+Nel caso in cui alcune variabili siano I(d) con d\>0 occorre valutare la presenza di *cointegrazione*. Si dice che due o più serie temporali aventi radici unitarie sono cointegrate se esiste una combinazione lineare tra di esse che è stazionaria: se $x_t \sim I(1)$ e $y_t \sim I(1)$, ma esiste una combinazione lineare t.c
+
+$z_t =y_t + \beta x_t \sim I(0)$, le serie si dicono *cointegrate* e condividono un equilibrio stabile di lungo periodo.
+
+In presenza di cointegrazione, la dinamica viene specificata tramite un modello *VECM* (forma a correzione dell'errore):
+
+$$\Delta Y_t = \Pi Y_{t-1} + \sum_{j=1}^{p-1} \Gamma_j \Delta Y_{t-j} + C D_t + u_t$$
+
+dove:
+
+- $\Gamma_j$ sono parametri autoregressivi che catturano gli aggiustamenti dinamici di breve periodo (*short-run*);
+
+- $\Pi = \alpha \beta'$ è la matrice di impatto di lungo periodo con rango $rk(\Pi) = r$ $(0 < r < k)$:
+
+  $\beta$ è la matrice $(k \times r)$ dei vettori di cointegrazione che definiscono le relazioni di equilibrio di lungo termine (coefficienti delle relazioni di cointegrazione, *long-run*);
+
+  $\alpha$ è la matrice $(k \times r)$ dei coefficienti di aggiustamento (*loadings* o velocità di rientro verso l'equilibrio).
+
+Il numero di relazioni di cointegrazione indipendenti $r$ viene identificato tramite la procedura di Johansen, basata su due statistiche test derivate dagli autovalori ordinati $\hat{\lambda}_i$:
+
+- *Trace Statistic:* $$\lambda_{\text{trace}}(r) = -N \sum_{i=r+1}^{k} \ln(1 - \hat{\lambda}_i)$$
+
+- *Maximum Eigenvalue Statistic:* $$\lambda_{\text{max}}(r, r+1) = -N \ln(1 - \hat{\lambda}_{r+1})$$
+
+La scelta del modello finale segue lo schema decisionale sul rango $r$:
+
+- $r = 0$: Assenza di cointegrazione (nessun trend comune stocastico). Si stima un modello $\text{VAR}(p-1)$ sulle serie differenziate prime ($\Delta Y_t$).
+
+- $0 < r < k$: Presenza di $r$ relazioni di lungo periodo ($k - r$ trend comuni). Si stima il modello *VECM* con termine di correzione dell'errore $\Pi Y_{t-1}$.
+
+- $r = k$: Le variabili originarie non contengono trend stocastici e sono già stazionarie a livelli. Si stima un modello $\text{VAR}(p)$ a livelli ($Y_t$).
