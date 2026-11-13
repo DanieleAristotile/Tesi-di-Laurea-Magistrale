@@ -198,9 +198,7 @@ Per un AR(p) stazionario in covarianza, risultano:
 - Autocorrelazione: $Cor(X_t, X_{t-k})$\
   $\rho(k) = \phi_1\rho(k-1) + \phi_2\rho(k-2) + \ldots + \phi_p\rho(k-p)$ per $k = 1, 2, \ldots$\
   Tali equazioni sono anche note come *equazioni di Yule-Walker*
-- Sfruttando $\rho(k) = \dfrac{\gamma(k)}{\gamma(0)}$, possiamo scrivere la varianza di un AR(p) come$$\gamma(0) = \dfrac{\sigma^2_e}{1 - \phi_1\rho(1) - \phi_2\rho(2) - \ldots - \phi_p\rho(p)}$$
-Affinché i momenti primo e secondo esistano finiti è richiesto che $|\phi| < 1$
-Tale condizione garantisce la *stazionarietà in senso debole* di un processo AR(1).
+- Sfruttando $\rho(k) = \dfrac{\gamma(k)}{\gamma(0)}$, possiamo scrivere la varianza di un AR(p) come$$\gamma(0) = \dfrac{\sigma^2_e}{1 - \phi_1\rho(1) - \phi_2\rho(2) - \ldots - \phi_p\rho(p)}$$ Affinché i momenti primo e secondo esistano finiti è richiesto che $|\phi| < 1$ Tale condizione garantisce la *stazionarietà in senso debole* di un processo AR(1).
 
 ```{r, echo=FALSE, fig.cap= "ACF AR(1) Φ=0.8", fig.cap="ACF AR(1) Φ=0.2",fig.cap="ACF AR(1) Φ=-0.5"}
 ar1_sim1 <- arima.sim(n=500, list(ar=0.8))
@@ -575,187 +573,96 @@ Per quanto riguarda la previsione di processi ARIMA(p,d,q), la procedura è legg
 
 3.  Fissato $\ell$, sulla parte destra dell’equazione, sostituire le osservazioni $X_{t+\ell}$ future con la loro previsione $\widehat{X}_{t+\ell}$, gli errori futuri $e_t(\ell)$ con zero, e gli errori fino al tempo t con i corrispondenti residui del modello, che indicheremo con $\hat{e}_t(\ell)$
 
-## GARCH (q,p)
+## Modelli strutturali di serie storiche
 
-Sia $Y_t$ una serie storica di interesse
+I modelli ARIMA descrivono una serie storica attraverso la sua struttura di autocorrelazione. Un approccio alternativo, sviluppato in particolare da Harvey (1989), consiste nel modellare direttamente le componenti introdotte nel paragrafo 2.1 (trend, stagionalità), che non sono osservabili e alle quali si consente di evolvere nel tempo in modo stocastico anziché deterministico. I modelli così ottenuti prendono il nome di modelli strutturali di serie storiche (*structural time series models*). In questa sezione e nella successiva la serie osservata è indicata con $y_t$, secondo la notazione dell'articolo di riferimento (Brodersen et al., 2015).
 
-La varianza di $Y_t$ condizionata ai valori osservati in precedenza $Y_{t-1}, Y_{t-2}, \ldots$ misura l'incertezza della deviazione di $Y_t$ dalla sua media condizionale $E(Y_t \mid Y_{t-1}, Y_{t-2}, \ldots)$
-
-Se il Data Generating Process di $Y_t$ seguisse un modello ARMA, la stima della varianza condizionale (one-step-ahead) sarebbe costante nel tempo e proporzionale alla varianza del termine di rumore. In pratica, la varianza condizionale (one-step-ahead) può variare in funzione dei valori passati del processo e, pertanto, può essere considerata un processo stocastico. La volatilità di una serie temporale finanziaria indica la varianza (o la deviazione standard a seconda del contesto) associata alla serie dei rendimenti. Volatilità è sinomimo di incertezza (una varianza maggiore implica maggiore incertezza, maggiore volatilità). Può inoltre accadere che a periodi di quiete si alternino periodi caratterizzati da maggiore turbolenza. Tale caratteristica è indicata in letteratura come *volatility clustering*. Tuttavia, il volatility clustering osservato indica che i rendimenti potrebbero non essere indipendenti e identicamente distribuiti (iid), altrimenti la varianza sarebbe costante nel tempo. Ciò significa che occorre distinguere tra serie storiche a ritardi non correlati (linearmente) da quelle a ritardi indipendenti. Per farlo occorre tenere presente che per serie storiche iid, qualsiasi trasformazione non lineare dei dati preserverebbe l’indipendenza e anche la correlazione lineare. Se i log-rendimenti fossero iid allora lo sarebbero anche i log-rendimenti presi in valore assoluto o al quadrato. Pertanto, se evidenze contro l’ipotesi iid possono essere ottenute analizzando la ACF e la PACF dei rendimenti assoluti o al quadrato.L’ispezione visiva della ACF e della PACF può essere supportata da una verifica d’ipotesi formale utilizzando il *test di McLeod*, dove l’output del test è un grafico in cui sono riportati i p-value del test usando differenti lag. I p-value \< 0.05 portano al rifiuto dell’ipotesi nulla di assenza di correlazione seriale. La forma distributiva dei log-rendimenti può essere valutata tramite un QQ plot, il quale suggerisce che la distribuzione dei log-rendimenti ha code più spesse di quelle di una distribuzione normale, il che porta alla statistica del test di normalità di Jarque-Bera, dove un p-value \< 0.01 porta al rifiuto dell'ipotesi nulla di normalità. I modelli ARCH/GARCH sono stati sviluppati per modellare e analizzare serie storiche che presentano queste caratteristiche. Sebbene però i modelli ARCH, nel corso del tempo sono risultati poco parsimoniosi, ne è stato derivato un modello nuovo che tentasse di superare le limitazioni di quello precedente denominato *Generalized AutoRegressive Conditional Heteroscedasticity* di ordine q e p, GARCH(q,p), ed è dato da $$\begin{split}
-\sigma^2_{t|t-1} = \, & \omega + \beta_1\sigma^2_{t-1|t-2} + \ldots 
-+ \beta_p\sigma^2_{t-p|t-p-1} \\
-& + \alpha_1 r^2_{t-1} + \alpha_2 r^2_{t-2} + \ldots + \alpha_q r^2_{t-q}
-\end{split}$$ dove $\omega$, $\beta_i$ e $\alpha_i$ sono i parametri incogniti da stimare e sono vincolati ad essere non negativi per garantire la non negatività delle stime della varianza condizionale. L'identificazione dell'ordine di un GARCH è agevolata rappresentando le varianze condizionali in termini di rendimenti al quadrato sfruttando le quantità
-
-$$\eta_t = r^2_t - \sigma^2_{t|t-1}$$
-
-che sono una sequenza di v.a. incorrelate a media nulla, con $\eta_t$ incorrelata con $r^2_t$. Sostituendo $\sigma^2_{t|t-1} = r^2_t - \eta_t$ nell'equazione precedente abbiamo
-
-$$\begin{split}
-r^2_t = \, & \omega + (\beta_1 + \alpha_1)r^2_{t-1} + \ldots + 
-(\beta_{\max(p,q)} + \alpha_{\max(p,q)})r^2_{t-\max(p,q)} \\
-& + \eta_t - \beta_1\eta_{t-1} - \ldots - \beta_p\eta_{t-p}
-\end{split}$$
-
-dove $\beta_k = 0$ per $k > p$ e $\alpha_k = 0$ per $k > q$.
-
-Questo fornisce una rappresentazione ARMA(max(p,q), p) per un modello GARCH(q,p) per i rendimenti al quadrato. Pertanto, per l'identificazione degli ordini $p$ e $\max(p,q)$ di un GARCH, si può applicare le stesse procedure di identificazione sviluppate per i modelli ARMA. Assumendo che i rendimenti siano debolmente stazionari, prendendo i valori attesi di entrambi i lati dell'equazione dei rendimenti al quadrato si ottiene
-
-$$\sigma^2 = \omega + \sigma^2 \sum_{i=1}^{\max(p,q)} (\beta_i + \alpha_i)$$
-
-da cui, la stima della *varianza incondizionata* (*long-run*) è data da
-
-$$\sigma^2 = \frac{\omega}{1 - \sum_{i=1}^{\max(p,q)} (\beta_i + \alpha_i)}$$
-
-che risulta finita se
-
-$$\sum_{i=1}^{\max(p,q)} (\beta_i + \alpha_i) < 1 
-\quad \text{con } \alpha_i \geq 0 \text{ e } \beta_i \geq 0$$
-
-la condizione è necessaria e sufficiente per garantire la stazionarietà in senso debole di un processo GARCH(q,p). La quantità
-
-$$P = \sum_{i=1}^{\max(p,q)} (\beta_i + \alpha_i)$$
-
-misura la *persistenza* della volatilità; maggiore (vicino a 1) è $P$, maggiore sarà la memoria del processo di varianza condizionale. $P$ esprime quindi di quanto la volatilità al tempo $t$ dipende da quella passata
-
-- l'asimmetria (skewness) di un GARCH è pari a 0
-
-- anche se $\varepsilon_t \sim N(0,1)$, un GARCH ha una curtosi più elevata di una Normale standard, il che implica che ha code più pesanti per un ARCH(q). La persistenza sarà calcolata come somma degli $\alpha_i$. Per quanto riguarda le previsioni h-step-ahead della varianza condizionale $\sigma^2_{t+h|t}$, viene utilizzata l'equazione del GARCH(q,p) andando a sostituire, per $h > p$, $\sigma^2_{t+h-1|t}$ e $r^2_{t+h-1|t}$ con le stime $\hat{\sigma}^2_{t+h-1|t}$, queste ultime ottenute in maniera ricorsiva
-
-Considerando un GARCH(q,p), le previsioni saranno
+Un modello strutturale è definito, in forma *state-space*, da una coppia di equazioni:
 
 $$\begin{aligned}
-\text{In general, for } h>1 \quad & \hat{\sigma}^2_{t+h|t} = \omega + \alpha\hat{\sigma}^2_{t+h-1|t} + \beta\hat{\sigma}^2_{t+h-1|t}
+y_t &= Z_t^{\top}\alpha_t + \varepsilon_t & \text{con} \quad \varepsilon_t &\sim N(0, \sigma_\varepsilon^2) \\
+\alpha_{t+1} &= T_t\,\alpha_t + R_t\,\eta_t & \text{con} \quad \eta_t &\sim N(0, Q_t)
 \end{aligned}$$
 
-Si osservi che nel caso di un GARCH(1,1), la previsione per $h = 1$ è
+La prima è l'equazione di osservazione, che lega il dato osservato $y_t$ a un vettore di stati latenti $\alpha_t$; la seconda è l'equazione di stato, che descrive l'evoluzione degli stati nel tempo. Le matrici $Z_t$, $T_t$, $R_t$ e $Q_t$ definiscono le componenti incluse nel modello, mentre gli errori $\varepsilon_t$ e $\eta_t$ sono indipendenti tra loro. La classe è molto ampia: tutti i modelli ARIMA possono essere scritti in questa forma (Brodersen et al., 2015, p. 252).
 
-$$\hat{\sigma}^2_{t+1|t} = (1 - \alpha - \beta)\sigma^2 + \alpha r^2_t + \beta\sigma^2_{t|t-1}$$
+Il caso più semplice è il modello a livello locale (*local level model*), in cui lo stato è costituito dal solo livello $\mu_t$ della serie:
 
-ovvero, la stima one-step-ahead della varianza condizionale è una media pesata tra la varianza incondizionata, il valore corrente del rendimento al quadrato e la stima corrente della varianza condizionata. Prima di accettare un modello e di interpretarne i risultati, è essenziale verificare se esso sia specificato correttamente, ovvero se le ipotesi di base del modello sono supportate dai dati.Se alcune ipotesi chiave del modello sembrano essere violate, è necessario specificare un nuovo modello, adattarlo e verificarlo nuovamente fino a quando non si trova un modello che fornisca un adattamento adeguato ai dati (seguendo un po' la filosofia Box e Jenkins vista per gli ARIMA). I *residui standardizzati*(i residui standardizzati sono ottenuti dividendo i residui per la deviazione standard condizionale stimata) si definiscono come
+$$\begin{aligned}
+y_t &= \mu_t + \varepsilon_t & \text{con} \quad \varepsilon_t &\sim N(0, \sigma_\varepsilon^2) \\
+\mu_{t+1} &= \mu_t + \eta_t & \text{con} \quad \eta_t &\sim N(0, \sigma_\eta^2)
+\end{aligned}$$
 
-$$\hat{\varepsilon}_t = \frac{r_t}{\hat{\sigma}_{t|t-1}}$$
+Il livello segue un processo Random Walk, mentre l'osservazione è pari al livello più un rumore. Le due varianze hanno un significato diverso: $\sigma_\eta^2$ misura di quanto il livello si sposta, in modo permanente, da un periodo al successivo; $\sigma_\varepsilon^2$ misura le oscillazioni transitorie attorno al livello. Se $\sigma_\eta^2 = 0$ il livello è costante e la serie è un rumore attorno a una media fissa; se $\sigma_\varepsilon^2 = 0$ la serie coincide con il livello ed è un Random Walk puro; nei casi intermedi il rapporto $q = \sigma_\eta^2 / \sigma_\varepsilon^2$ (*signal-to-noise ratio*) stabilisce quanta parte di ogni variazione osservata viene attribuita a uno spostamento permanente del livello.
 
-che, nel caso in cui il modello sia correttamente specificato, devono essere approssimativamente *iid*
+Il modello a livello locale è strettamente legato ai processi ARIMA. Applicando la differenza prima si ottiene
 
-Come per gli ARIMA,verranno applicati test diagnostici sui residui standardizzati per
+$$\Delta y_t = \eta_{t-1} + \varepsilon_t - \varepsilon_{t-1}$$
 
-- verificare l'assenza di correlazione seriale
+che è un processo stazionario con autocovarianze $\gamma(0) = \sigma_\eta^2 + 2\sigma_\varepsilon^2$, $\gamma(1) = -\sigma_\varepsilon^2$ e $\gamma(k) = 0$ per $k \geq 2$. L'ACF di $\Delta y_t$ si annulla dunque dopo il primo ritardo, come in un processo MA(1): la serie $y_t$ è integrata di ordine uno e la sua forma ridotta è un ARIMA(0,1,1), con $\rho(1) = -1/(q+2)$ e parametro $\theta$ compreso tra $-1$ e $0$ (Harvey, 1989). Il modello è quindi adatto a serie non stazionarie in livello, senza che sia necessario differenziarle preventivamente.
 
-- valutare l'adeguatezza della forma distributiva assunta in fase di specificazione del modello (ad esempio normale, t student, etc)
+Allo stato si possono aggiungere altre componenti. Con una pendenza $\delta_t$, anch'essa variabile nel tempo, si ottiene il modello a trend lineare locale (*local linear trend*), che si adatta rapidamente alle variazioni locali della serie ma, nelle previsioni su orizzonti lunghi, tende a produrre intervalli implausibilmente ampi (Brodersen et al., 2015, p. 253): per questo motivo nell'analisi si utilizza il modello a livello locale. La componente stagionale, a sua volta, non è necessaria con dati annuali.
 
-## Modelli Multivariati
+Poiché gli stati non sono osservabili, devono essere stimati a partire dai dati. Lo strumento è il filtro di Kalman, un algoritmo ricorsivo che a ogni nuova osservazione aggiorna la stima dello stato e la relativa incertezza. Indicando con $a_t$ e $P_t$ la media e la varianza del livello $\mu_t$ condizionate alle osservazioni fino al tempo $t-1$, per il modello a livello locale le ricorsioni sono (Durbin e Koopman, 2012):
 
-Nello studio congiunto di due serie storiche $X_t$ e $Y_t$, l'analisi della semplice correlazione campionaria lineare istantanea (contemporanea) non è sufficiente a descrivere le dinamiche temporali, in quanto l'effetto di una variabile sull'altra può manifestarsi dopo alcuni ritardi temporali (*lag*).
+$$\begin{gathered}
+v_t = y_t - a_t \qquad F_t = P_t + \sigma_\varepsilon^2 \qquad K_t = P_t / F_t \\
+a_{t+1} = a_t + K_t\,v_t \qquad P_{t+1} = P_t\,(1 - K_t) + \sigma_\eta^2
+\end{gathered}$$
 
-Per misurare la dipendenza lineare tra due serie storiche a diversi ritardi temporali, si definisce la *funzione di cross-correlazione campionaria (CCF)*:
+dove $v_t$ è l'errore di previsione a un passo, $F_t$ la sua varianza e $K_t$ il guadagno di Kalman, compreso tra 0 e 1: la nuova stima del livello è pari a quella precedente, corretta per una frazione $K_t$ dell'errore commesso.
 
-$$\rho_k(X, Y) = \frac{\sum_t (X_t - \bar{X})(Y_{t-k} - \bar{Y})}
-{\sqrt{\sum_t (X_t - \bar{X})^2} \sqrt{\sum_t (Y_t - \bar{Y})^2}}, 
-\quad k = -T,..., -2, -1, 0, +1, +2,...,+T$$
+Quando un'osservazione manca, il passo di aggiornamento viene omesso e l'incertezza sul livello cresce: è ciò che accade nella previsione, in cui tutte le osservazioni future sono mancanti. Per il modello a livello locale la previsione puntuale a $\ell$ passi dall'ultima osservazione $n$ è costante e pari all'ultima stima del livello, $a_{n+1}$, mentre la varianza dell'errore di previsione
 
-- Per $k = 0$, $\rho_0(X, Y)$ quantifica la correlazione contemporanea al tempo $t$.
-- Per $k > 0$, $\rho_k(X, Y)$ stima l'impatto ritardato di $Y_{t-k}$ su $X_t$.
-- Per $k < 0$, fornisce la relazione tra i valori passati di $X$ e i valori correnti di $Y$.
-- Se $X_t = Y_t$, la CCF coincide con la funzione di autocorrelazione univariata ($ACF$).
+$$Var(e_n(\ell)) = P_{n+1} + (\ell - 1)\,\sigma_\eta^2 + \sigma_\varepsilon^2$$
 
-Nell’analisi di serie storiche multivariate vi è il rischio di incorrere in stime di correlazioni insensate (spurie), ovvero correlazioni che risultano statisticamente significative, ma che di fatto non lo sono. L'uso degli intervalli di confidenza standard al 95% ($\pm 1.96/\sqrt{n}$) per verificare la significatività della CCF presuppone che entrambe le variabili siano processi White Noise incorrelati.
+cresce linearmente con l'orizzonte $\ell$, in analogia con quanto visto per il Random Walk nel paragrafo 2.5.
 
-Quando le serie $X_t$ e $Y_t$ mostrano forte autocorrelazione interna, la varianza teorica della cross-correlazione tra due processi ARMA(p,q) stazionari risulta pari a:
+## Analisi controfattuale
 
-$$\text{Var}(\rho_k(X, Y)) \approx \frac{1}{n} \left[ 1 + 2 \sum_{j} \rho_j(X)\rho_j(Y) \right]$$
+L'analisi controfattuale misura l'effetto di un evento su una serie storica confrontando ciò che si è osservato con ciò che si sarebbe osservato se l'evento non fosse avvenuto. La metodologia adottata è quella proposta da Brodersen et al. (2015).
 
-Nel caso specifico di due $AR(1)$ con parametri $\phi_X$ e $\phi_Y$ vicini a 1, la varianza diventa:
+Sia $y_1, \dots, y_m$ la serie osservata e sia $n$ l'ultimo periodo che precede l'evento. Le osservazioni $y_{1:n} = (y_1, \dots, y_n)$ costituiscono il periodo pre-evento, le osservazioni $y_{n+1:m}$ il periodo post-evento. Lo scenario controfattuale è la serie $\tilde{y}_{n+1}, \dots, \tilde{y}_m$ che si sarebbe osservata nel periodo post-evento in assenza dell'evento: non essendo osservabile, deve essere stimata. A questo scopo un modello strutturale è stimato sul solo periodo pre-evento ed è utilizzato per prevedere il periodo successivo. Nell'articolo il modello comprende anche una regressione su serie di controllo non toccate dall'evento; nel caso qui studiato tali serie non sono disponibili (paragrafo 1.3.5) e il modello si riduce al livello locale del paragrafo 2.6.
 
-$$\text{Var}(\rho_k(X, Y)) = \frac{1 + \phi_X \phi_Y}{n(1 - \phi_X \phi_Y)}$$
+### Inferenza bayesiana e scenario controfattuale
 
-Tale quantità non converge a $1/n$ ma diverge, determinando stime della CCF artificialmente gonfiate e statisticamente significative anche in assenza di qualsiasi reale legame economico (fenomeno della *correlazione spuria*).
+Nell'approccio bayesiano i parametri del modello, $\theta = (\sigma_\varepsilon^2, \sigma_\eta^2)$, sono trattati come variabili aleatorie. La conoscenza disponibile prima di osservare i dati è espressa da una distribuzione a priori $p(\theta)$, che viene aggiornata con l'informazione contenuta nei dati attraverso il teorema di Bayes:
 
-Per ristabilire la corretta varianza asintotica $1/n$ e testare l'effettiva significatività della CCF, si applica la procedura di *Prewhitening*, volta ad annullare l'autocorrelazione interna di una delle due serie:
+$$p(\theta \mid y_{1:n}) \propto p(y_{1:n} \mid \theta)\, p(\theta)$$
 
-1.  Si identifica e stima un modello $\text{ARIMA}(p, d, q)$ sulla prima serie $X_t$ in modo che i residui $\hat{e}_{X,t}$ siano un processo White Noise:
+dove $p(y_{1:n} \mid \theta)$ è la verosimiglianza e $p(\theta \mid y_{1:n})$ la distribuzione a posteriori. Il risultato della stima non è quindi un singolo valore per ciascun parametro, ma una distribuzione, che ne descrive l'incertezza.
 
-$$\Phi_X(L)(1 - L)^d X_t = \Theta_X(L) e_{X,t} \implies \hat{e}_{X,t} \sim WN(0, \sigma^2)$$
+Per le varianze si adotta una distribuzione a priori di tipo Gamma sull'inverso della varianza (Brodersen et al., 2015, p. 255):
 
-2.  Si filtra la serie $Y_t$ applicando lo stesso identico operatore polinomiale stimato per $X_t$, ricavando i residui trasformati $\hat{e}_{Y,t}$:
+$$\frac{1}{\sigma^2} \sim G\left(\frac{\nu}{2}, \frac{s}{2}\right)$$
 
-$$\hat{e}_{Y,t} = \frac{\Phi_X(L)(1 - L)^d}{\Theta_X(L)} Y_t$$
+dove $G(a,b)$ indica una distribuzione Gamma con valore atteso $a/b$. Il rapporto $s/\nu$ è il valore di $\sigma^2$ ritenuto plausibile a priori, mentre $\nu$ è il peso assegnato a tale valore, espresso come numero di osservazioni equivalenti. La scelta più delicata riguarda la varianza del livello $\sigma_\eta^2$, da cui dipendono la rapidità con cui lo scenario controfattuale può allontanarsi dall'ultimo livello stimato e, di conseguenza, l'ampiezza degli intervalli. Seguendo l'articolo si pone $\nu = 32$ (p. 262). In un modello privo di serie di controllo, tuttavia, il livello deve rendere conto dell'intera variabilità della serie da un periodo all'altro: il valore a priori della deviazione standard del livello è perciò posto pari alla deviazione standard delle differenze prime della serie nel periodo pre-evento, anziché ai valori indicati per i modelli con serie di controllo, nei quali al livello resta poca variabilità da spiegare (pp. 262, 266). Poiché il peso della distribuzione a priori non è trascurabile rispetto al numero di osservazioni disponibili, questa scelta è sottoposta a verifica (paragrafo 2.7.2). Alla varianza del rumore di osservazione è assegnata una distribuzione a priori poco informativa.
 
-3.  Si calcola la cross-correlazione campionaria tra i due vettori di residui, $\rho_k(\hat{e}_X, \hat{e}_Y)$. Poiché $\hat{e}_{X,t}$ è un rumore bianco, le bande di confidenza $\pm 1.96/\sqrt{n}$ ritornano valide, consentendo di identificare la vera struttura dei ritardi temporali non spuria tra le due variabili.
+La distribuzione a posteriori non è disponibile in forma chiusa e viene approssimata per simulazione, con un algoritmo *Markov chain Monte Carlo* (MCMC) che alterna due passi (Brodersen et al., 2015, p. 258): dati i parametri, si simulano gli stati $\mu_1, \dots, \mu_n$ per mezzo del filtro di Kalman e del relativo algoritmo di simulazione (Durbin e Koopman, 2012); dati gli stati, si simulano i parametri dalle rispettive distribuzioni condizionate. Ripetendo i due passi un numero elevato di volte, e scartando le iterazioni iniziali, si ottiene un campione $(\theta^{(\tau)}, \mu^{(\tau)})$, con $\tau = 1, \dots, N$, dalla distribuzione a posteriori congiunta di parametri e stati. Per ciascuna estrazione $\tau$ si simula quindi una traiettoria dello scenario controfattuale, proseguendo il modello oltre il periodo $n$:
 
-Però, se una delle serie è I(d) con d \> 0, entrambe devono essere differenziate d volte, anche se una delle due dovesse essere I(0). Inoltre, il filtraggio nello step 2, non assicura che i residui di Yt siano incorrelati. Tuttavia questo non costituisce un problema, in quanto ciò che conta è che solo una delle 2 variabili sia WN
+$$\begin{aligned}
+\tilde{\mu}_{t}^{(\tau)} &= \tilde{\mu}_{t-1}^{(\tau)} + \eta_{t-1}^{(\tau)} \\
+\tilde{y}_{t}^{(\tau)} &= \tilde{\mu}_{t}^{(\tau)} + \varepsilon_{t}^{(\tau)}
+\end{aligned}
+\qquad \text{per } t = n+1, \dots, m$$
 
-### Il Test di Granger
+dove $\tilde{\mu}_{n}^{(\tau)} = \mu_{n}^{(\tau)}$ è il livello dell'ultimo periodo pre-evento nell'estrazione $\tau$, mentre $\eta_{t-1}^{(\tau)}$ e $\varepsilon_t^{(\tau)}$ sono estratti da distribuzioni normali con le varianze della stessa estrazione. L'insieme delle traiettorie è un campione dalla distribuzione a posteriori predittiva $p(\tilde{y}_{n+1:m} \mid y_{1:n})$, condizionata unicamente ai dati osservati prima dell'evento. Rispetto all'intervallo di previsione del paragrafo 2.5, essa presenta due differenze: tiene conto dell'incertezza sui parametri, che non sono sostituiti da una stima puntuale, e descrive l'intera traiettoria e non i singoli periodi separatamente, il che è essenziale per calcolare grandezze cumulate (Brodersen et al., 2015, p. 259).
 
-Il test di causalità Granger valuta se i valori passati di una variabile $x_t$ possiedono potere predittivo incrementale per la previsione di $y_t$, oltre all'informazione già contenuta dai ritardi di $y_t$ stesso (sostanzialmente serve per determinare se una serie temporale $x_t$ può migliorare la previsione di un’altra serie temporale $y_t$).
+### Effetto dell'evento e verifiche di robustezza
 
-Formalmente, si confrontano due modelli autoregressivi:
+Per ogni traiettoria $\tau$ e per ogni periodo $t = n+1, \dots, m$, l'effetto puntuale è la differenza tra il valore osservato e il valore controfattuale, mentre l'effetto cumulato è la somma degli effetti puntuali fino al periodo $t$ (Brodersen et al., 2015, p. 260):
 
-- *Modello ristretto (senza ritardi di* $x_t$)*:*
+$$\phi_t^{(\tau)} = y_t - \tilde{y}_t^{(\tau)} \qquad\qquad
+\sum_{t'=n+1}^{t} \phi_{t'}^{(\tau)}$$
 
-$$y_t = \alpha_0 + \sum_{i=1}^{p} \beta_i y_{t-i} + \varepsilon_t$$
+La distribuzione di queste quantità al variare di $\tau$ è la distribuzione a posteriori dell'effetto. Essa viene sintetizzata dalla mediana e dall'intervallo di credibilità al 95%, delimitato dai quantili di ordine 0,025 e 0,975. A differenza dell'intervallo di confidenza, l'intervallo di credibilità si interpreta direttamente come l'insieme di valori che, dati il modello e le osservazioni, contiene l'effetto con probabilità del 95%. Si conclude per la presenza di un effetto quando l'intervallo dell'effetto cumulato esclude lo zero (p. 262). L'effetto cumulato è interpretabile quando la variabile è una grandezza di flusso, come una spesa annua, e non quando è una grandezza di stock (p. 260).
 
-- *Modello non ristretto (con ritardi di* $x_t$):
+Poiché il modello è stimato sul logaritmo della serie, le traiettorie simulate sono riportate nell'unità di misura originaria con la trasformazione esponenziale prima di calcolare gli effetti. L'effetto relativo è il rapporto tra l'effetto cumulato e la somma dei valori controfattuali sullo stesso periodo.
 
-$$y_t = \alpha_0 + \sum_{i=1}^{p} \beta_i y_{t-i} + \sum_{j=1}^{q} \gamma_j x_{t-j} + \varepsilon_t$$
+L'intervallo di credibilità riflette l'incertezza interna al modello, non la possibilità che il modello stesso sia inadeguato. Per questo la stima è accompagnata da tre verifiche:
 
-Il sistema di ipotesi è:
+- *Test placebo*. Seguendo il suggerimento di Brodersen et al. (2015, p. 270), il modello è applicato a interventi ipotetici, collocati in date del periodo pre-evento: per ciascuna data fittizia si stima il modello sulle osservazioni precedenti e si calcola l'effetto cumulato sugli anni successivi. La quota di date per le quali l'intervallo esclude lo zero misura la frequenza dei falsi allarmi, che deve risultare contenuta
+- *Analisi di sensibilità*. La stima è ripetuta modificando le scelte dalle quali il risultato può dipendere: il valore a priori della varianza del livello e l'ampiezza del periodo pre-evento
+- *Confronto con un modello di riferimento*. Lo scenario controfattuale è ricalcolato con un processo Random Walk, con e senza drift (paragrafo 2.5), simulato a partire dall'ultimo valore osservato prima dell'evento
 
-$$\begin{cases}
-H_0 : \gamma_1 = \gamma_2 = \cdots = \gamma_q = 0 & \quad (x_t \text{ non causa nel senso di Granger } y_t) \\
-H_1 : \exists \, \gamma_j \neq 0                  & \quad (x_t \text{ causa nel senso di Granger } y_t)
-\end{cases}$$
-
-La verifica statistica si basa sul test $F$ di Fisher:
-
-$$F = \frac{(RSS_r - RSS_u)/q}{RSS_u/(N - p - q - 1)} \sim \mathcal{F}(q,\, N - p - q - 1)$$
-
-dove $RSS_r$ e $RSS_u$ rappresentano la somma dei quadrati dei residui del modello ristretto e non ristretto rispettivamente, e $N$ è la dimensione campionaria (numero di osservazioni). La corretta applicazione richiede che le serie siano stazionarie e che il set informativo sia adeguatamente specificato.
-
-### Modelli VAR e VECM
-
-Per un vettore di $k$ serie stazionarie $Y_t = (y_{1t}, y_{2t}, \ldots, y_{kt})'$, il modello $\text{VAR}(p)$ estende il concetto di autoregressione univariata trattando tutte le variabili come endogene in modo simmetrico:
-
-$$Y_t = C D_t + A_1 Y_{t-1} + A_2 Y_{t-2} + \cdots + A_p Y_{t-p} + u_t$$
-
-dove:
-
-- $A_i$ sono matrici di coefficienti di dimensione $(k \times k)$ per ciascun ritardo $i = 1, \ldots, p$;
-
-- $D_t$ è il vettore contenente i termini deterministici (intercetta, trend lineare, stagionalità) associato alla matrice di parametri $C$;
-
-- $u_t \sim WN(0, \Sigma_u)$ è un vettore di innovazioni White Noise $k$-dimensionale con matrice di covarianza contemporanea $\Sigma_u$.
-
-Nel caso in cui alcune variabili siano I(d) con d\>0 occorre valutare la presenza di *cointegrazione*. Si dice che due o più serie temporali aventi radici unitarie sono cointegrate se esiste una combinazione lineare tra di esse che è stazionaria: se $x_t \sim I(1)$ e $y_t \sim I(1)$, ma esiste una combinazione lineare t.c
-
-$z_t =y_t + \beta x_t \sim I(0)$, le serie si dicono *cointegrate* e condividono un equilibrio stabile di lungo periodo.
-
-In presenza di cointegrazione, la dinamica viene specificata tramite un modello *VECM* (forma a correzione dell'errore):
-
-$$\Delta Y_t = \Pi Y_{t-1} + \sum_{j=1}^{p-1} \Gamma_j \Delta Y_{t-j} + C D_t + u_t$$
-
-dove:
-
-- $\Gamma_j$ sono parametri autoregressivi che catturano gli aggiustamenti dinamici di breve periodo (*short-run*);
-
-- $\Pi = \alpha \beta'$ è la matrice di impatto di lungo periodo con rango $rk(\Pi) = r$ $(0 < r < k)$:
-
-  $\beta$ è la matrice $(k \times r)$ dei vettori di cointegrazione che definiscono le relazioni di equilibrio di lungo termine (coefficienti delle relazioni di cointegrazione, *long-run*);
-
-  $\alpha$ è la matrice $(k \times r)$ dei coefficienti di aggiustamento (*loadings* o velocità di rientro verso l'equilibrio).
-
-Il numero di relazioni di cointegrazione indipendenti $r$ viene identificato tramite la procedura di Johansen, basata su due statistiche test derivate dagli autovalori ordinati $\hat{\lambda}_i$:
-
-- *Trace Statistic:* $$\lambda_{\text{trace}}(r) = -N \sum_{i=r+1}^{k} \ln(1 - \hat{\lambda}_i)$$
-
-- *Maximum Eigenvalue Statistic:* $$\lambda_{\text{max}}(r, r+1) = -N \ln(1 - \hat{\lambda}_{r+1})$$
-
-La scelta del modello finale segue lo schema decisionale sul rango $r$:
-
-- $r = 0$: Assenza di cointegrazione (nessun trend comune stocastico). Si stima un modello $\text{VAR}(p-1)$ sulle serie differenziate prime ($\Delta Y_t$).
-
-- $0 < r < k$: Presenza di $r$ relazioni di lungo periodo ($k - r$ trend comuni). Si stima il modello *VECM* con termine di correzione dell'errore $\Pi Y_{t-1}$.
-
-- $r = k$: Le variabili originarie non contengono trend stocastici e sono già stazionarie a livelli. Si stima un modello $\text{VAR}(p)$ a livelli ($Y_t$).
-
-
+L'analisi è condotta in R con il pacchetto CausalImpact, che implementa il metodo (Brodersen et al., 2015, p. 247). Prima della stima il pacchetto standardizza la serie con la media e la deviazione standard del periodo pre-evento, così che i risultati non dipendano dall'unità di misura dei dati.
