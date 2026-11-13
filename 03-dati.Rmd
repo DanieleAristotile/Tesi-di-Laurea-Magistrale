@@ -198,6 +198,7 @@ Il confronto congiunto delle tre traiettorie evidenzia chiaramente il fenomeno a
 
 
 ```{r echo=FALSE}
+library(dplyr)
 library(moments)
 library(knitr)
 library(kableExtra)
@@ -229,7 +230,7 @@ kable(desc_stats_log, digits = 3, align = "c",
 $\ln(\text{Box Office})$:La serie mostra una media pari a 7,447 e la variabilità più elevata dell'intero campione, con una deviazione standard di 1,132. L'intervallo tra il valore minimo (1,553, registrato nel secondo trimestre del 2020 durante il lockdown integrale) e il valore massimo (8,116) riflette la gravità dello shock pandemico subito dalle sale cinematografiche. Questo evento eccezionale influisce pesantemente sulla forma della distribuzione: fortemente asimmetrica a sinistra ($\text{Skewness} = -3{,}687$) e con una curtosi elevata ($\text{Kurtosis} = 17{,}914$) viene evidenziata la presenza di una pesante coda sinistra causata dai trimestri di chiusura forzata. Tale anomalia distributiva giustifica formalmente l'introduzione della variabile d'intervento ($Covid\_Dummy$) nei modelli econometrici, necessaria per evitare che i residui risultino gravemente non normali. I ricavi Netflix nel segmento UCAN presentano un valore medio di 7,877, con un minimo di 6,892 registrato nel primo trimestre del 2015 (avvio della serie) e un massimo di 8,600 nel secondo trimestre del 2026 (ultima osservazione disponibile). La deviazione standard, pari a 0,503, riflette il trend di crescita sostenuto e pressoché ininterrotto della piattaforma nell'intero periodo campionario. L'asimmetria è moderata (Skewness = −0,480) e la curtosi risulta inferiore a quella gaussiana (Kurtosis = 2,110): a differenza del Box Office, la serie non mostra code pesanti riconducibili allo shock pandemico, poiché il mercato UCAN di Netflix ha continuato a crescere anche durante il 2020, beneficiando dell'aumento della domanda di intrattenimento domestico durante il lockdown. La spesa aggregata per servizi ricreativi funge da benchmark macroeconomico e presenta la massima stabilità campionaria, con una deviazione standard di appena 0,195 attorno a una media di 11,949. L'indice di asimmetria pressoché nullo ($\text{Skewness} = 0{,}027$) e la curtosi pari a 2,273 indicano una distribuzione simmetrica e regolare, confermando come i consumi complessivi per il tempo libero abbiano seguito una traiettoria macroeconomica fluida, assorbendo rapidamente la flessione registrata nel 2020.
 
 ```{r echo=FALSE}
-
+library(dplyr)
 library(kableExtra)
 
 cor_matrix <- data.frame(
