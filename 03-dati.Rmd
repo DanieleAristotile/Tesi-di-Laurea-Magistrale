@@ -1,297 +1,196 @@
 # DATI
 
-## Descrizione delle serie storiche
-
-Per analizzare empiricamente le interazioni dinamiche tra il consumo cinematografico tradizionale e la diffusione dei servizi di streaming a pagamento, è stato costruito un dataset trimestrale bilanciato che copre l'orizzonte temporale compreso tra il primo trimestre del 2015 (2015-Q1) e il secondo trimestre del 2026 (2026-Q2), per un totale di $T = 46$ osservazioni.
-
-La scelta della frequenza trimestrale risponde ad una duplice esigenza: da un lato, consente di separare il rumore stocastico che si genera nei dati giornalieri/settimanali; dall'altro, garantisce una perfetta sincronizzazione temporale con le scadenze contabili obbligatorie delle società quotate e con le rilevazioni dei principali aggregati macroeconomici.
-
-Il dataset include tre variabili endogene principali ed una variabile dummy dovuta al contesto storico:
-
-- Incassi del Box Office americano (Box_Office_mojo):
-
-  Rappresenta la domanda aggregata per l'ingresso nelle sale cinematografiche di Stati Uniti e Canada con cadenza trimestrale a partire dalle rilevazioni giornaliere fornite da *Box Office Mojo*. Per garantire la perfetta coerenza dimensionale con le altre grandezze contabili e macroeconomiche, la serie grezza è stata convertita in milioni di dollari.
-
-- Ricavi Totali segmento UCAN (Netflix):
-
-  Costituisce la variabile proxy di riferimento per l'adozione e la spesa nei servizi di Subscription Video on Demand (SVOD). I dati provengono direttamente dai bilanci trimestrali depositati presso la *Securities and Exchange Commission* (SEC - Form 10-Q e Form 10-K). La variabile è rendicontata all'origine in milioni di dollari e include i flussi generati dalle sottoscrizioni UCAN (USA e Canada).
-
-- Personal Consumption Expenditures (PCE) - Servizi Ricreativi:
-
-Rappresenta la spesa nominale trimestrale sostenuta dai consumatori statunitensi in servizi ricreativi (in miliardi di dollari, dato destagionalizzato ad andamento annuale), estratta dal database FRED (Federal Reserve Bank of St. Louis, serie DRCARC1Q027SBEA) a partire dalle stime del Bureau of Economic Analysis (BEA). A differenza dell'indice dei prezzi PCE — comunemente utilizzato come misura dell'inflazione — questa componente misura il livello di spesa discrezionale delle famiglie destinata al tempo libero, non una variazione di prezzo. Costituisce pertanto la variabile macroeconomica di controllo volta a isolare le variazioni della domanda di intrattenimento attribuibili all'andamento aggregato del ciclo economico e del reddito disponibile, distinguendole dalle dinamiche specifiche del settore cinematografico e streaming. Trattandosi di una serie espressa su base annualizzata, il dato è stato de-annualizzato dividendo per quattro e riportato in milioni di dollari per garantire coerenza dimensionale con le altre variabili del dataset.
-
-- Variabile dummy;
-
-  Al fine di catturare lo shock strutturale asimmetrico causato dalla pandemia, a cui è seguita la fase di lockdown e della conseguente chiusura delle sale di proiezione, è stata inclusa una variabile dummy binaria che assume valore 1 nel periodo compreso tra il 2020-Q1 e il 2021-Q1, e valore 0 in tutti i trimestri antecedenti e successivi. La proroga fino al primo trimestre del 2021 è motivata dal protrarsi delle fortissime restrizioni a cui erano ancora soggetti i cinema durante quel periodo
-
-```{r echo=FALSE}
+```{r dati-cap3, include=FALSE}
 library(knitr)
 library(kableExtra)
+# Spesa per l'ingresso nelle sale (BEA), miliardi di dollari correnti
+bo <- read.csv("DMOVRC1A027NBEA.csv")
+names(bo) <- c("data", "valore")
+bo$anno <- as.integer(substr(bo$data, 1, 4))
 
-dataset_finale %>%
-  select(Quarter, BOX_millions, NFLX_millions, PCE_millions, Covid_Dummy) %>%
-  slice(c(1:5, (n()-4):n())) %>%
-  mutate(across(where(is.numeric), ~round(., 1))) %>%
-  kable(
-    caption = "Estratto del dataset trimestrale (prime e ultime 5 osservazioni)",
-    col.names = c("Trimestre", "Box Office (mln \\$)", "Netflix UCAN (mln \\$)", "PCE (mln \\$)", "Covid Dummy"),
-    booktabs = TRUE
-  ) %>%
-  kable_styling(latex_options = c("hold_position", "striped", "scale_down"), font_size = 9)
+# CPI-U: media annua dei valori mensili
+cpi <- read.csv("CPIAUCNS.csv", na.strings = c(".", ""))
+names(cpi) <- c("data", "cpi")
+cpi$anno <- as.integer(substr(cpi$data, 1, 4))
+cpi <- cpi[!is.na(cpi$cpi), ]                 # tolgo i mesi senza dato
+cpi_a <- aggregate(cpi ~ anno, data = cpi, FUN = mean)
+
+# Spesa reale in dollari del 2019
+dati <- merge(bo[, c("anno", "valore")], cpi_a, by = "anno")
+dati$reale_cpi <- dati$valore * dati$cpi[dati$anno == 2019] / dati$cpi
+
+# Indice BEA dei prezzi degli ingressi al cinema
+pb <- read.csv("DMOVRG3A086NBEA.csv", na.strings = c(".", ""))
+names(pb) <- c("data", "prezzo_bea")
+pb$anno <- as.integer(substr(pb$data, 1, 4))
+dati <- merge(dati, pb[, c("anno", "prezzo_bea")], by = "anno")
+
+# Box Office Mojo: incassi "domestic", miliardi di dollari correnti
+bom <- data.frame(anno = 1982:2025,
+                  bom = c( 3.002,  2.738,  3.066,  3.017,  3.065,  3.343,  3.542,  4.084,
+                           4.326,  4.336,  4.520,  4.823,  5.062,  5.106,  5.601,  6.077,
+                           6.696,  7.341,  7.476,  7.959,  9.165,  9.233,  9.355,  8.834,
+                           9.203,  9.679,  9.653, 10.616, 10.584, 10.156, 10.844, 10.956,
+                           10.369, 11.149, 11.375, 11.075, 11.892, 11.363,  2.113,  4.483,
+                           7.370,  8.908,  8.571,  8.657))
+dati <- merge(dati, bom, by = "anno", all.x = TRUE)
+dati$bom_reale <- dati$bom * dati$cpi[dati$anno == 2019] / dati$cpi
 ```
+
+## Descrizione delle serie storiche
+
+Per stimare l'impatto congiunto della pandemia e della diffusione dello streaming sul box office statunitense è stato costruito un dataset annuale che copre l'intervallo compreso tra il 1959 e il 2025, per un totale di $T = 67$ osservazioni. Il periodo precedente l'evento, sul quale viene stimato il modello, comprende gli anni dal 1960 al 2019, mentre il 1959 è utilizzato come base per il calcolo della prima variazione annua; il periodo di valutazione comprende gli anni dal 2020 al 2025.
+La scelta della frequenza annuale risponde a una duplice esigenza: da un lato, consente di disporre di una serie lunga, che copre sessant'anni prima dell'evento e permette di stimare con precisione la dinamica ordinaria del mercato; dall'altro, elimina la componente stagionale, in quanto altrimenti andrebbe modellata esplicitamente il che non è di interesse ai fini della valutazione dell'effetto.
+
+Il dataset include una variabile principale e tre serie di supporto, utilizzate per esprimere la spesa a prezzi costanti e per valutare la rappresentatività della variabile principale:
+
+- Spesa per l'ingresso nelle sale cinematografiche (BEA):
+
+  È la variabile oggetto dell'analisi e rappresenta la spesa sostenuta dai consumatori statunitensi per l'ingresso nelle sale cinematografiche, rilevata dal Bureau of Economic Analysis (BEA) nell'ambito della contabilità nazionale come componente della spesa per consumi personali (*Personal Consumption Expenditures: Admissions to specified spectator amusements: Motion picture theaters*). La serie, estratta dal database FRED della Federal Reserve Bank of St. Louis (serie DMOVRC1A027NBEA), ha frequenza annuale, è espressa in miliardi di dollari correnti ed è disponibile dal 1959. Secondo la documentazione metodologica del BEA [@bea_nipa_cap5], la stima si basa sui ricavi delle sale cinematografiche rilevati dal Census Bureau, tramite l'Economic Census negli anni di riferimento e la Service Annual Survey negli altri anni; per l'anno più recente, in attesa di tali dati, la stima è estrapolata a partire dagli incassi al botteghino rilevati da Box Office Mojo. Si utilizza la versione della serie aggiornata il 30 settembre 2026: i valori degli ultimi anni, e in particolare quello del 2025, sono provvisori e potranno essere rivisti nei successivi aggiornamenti.
+
+- Indice dei prezzi al consumo (CPI-U):
+
+  È il deflatore utilizzato per esprimere la spesa a prezzi costanti. Si tratta dell'indice dei prezzi al consumo per tutti i consumatori urbani (*Consumer Price Index for All Urban Consumers: All Items in U.S. City Average*), calcolato dal Bureau of Labor Statistics (BLS) e disponibile nel database FRED con frequenza mensile (serie CPIAUCNS, dati non destagionalizzati, base 1982–1984 = 100). Il valore annuale è ottenuto come media dei valori mensili, secondo lo stesso criterio adottato dal BLS. Per il 2025 la media è calcolata su undici mesi, poiché il dato di ottobre non è stato rilevato a causa della sospensione delle attività del governo federale; anche in questo caso il criterio coincide con quello adottato dal BLS per il dato annuale ufficiale.^[Bureau of Labor Statistics, domande frequenti sugli effetti della sospensione delle attività federali del 2025 sul CPI: <https://www.bls.gov/cpi/additional-resources/2025-federal-government-shutdown-impact-cpi-faq.htm>.]
+
+- Indice dei prezzi degli ingressi al cinema (BEA):
+
+  È l'indice dei prezzi che il BEA associa alla spesa per l'ingresso nelle sale, disponibile dal 1959 e costruito a partire dalla componente del CPI relativa agli ingressi a cinema, teatri e concerti [@bea_nipa_cap5]. Permette di confrontare l'andamento del prezzo dei biglietti con quello dei prezzi al consumo nel loro complesso e di verificare se i risultati dipendano dalla scelta del deflatore.
+
+- Incassi al botteghino (Box Office Mojo):
+
+  Rappresentano gli incassi lordi annui dei film proiettati nelle sale di Stati Uniti e Canada (*Domestic Yearly Box Office*), rilevati da Box Office Mojo ed espressi in miliardi di dollari correnti. La serie è utilizzata a partire dal 1982. La serie non entra nel modello, ma serve a verificare in che misura la spesa rilevata dal BEA segua l'andamento degli incassi al botteghino (paragrafi 3.2 e 3.3).
+
+La spesa a prezzi costanti è ottenuta riportando ogni valore ai prezzi del 2019, ultimo anno precedente l'evento:
+
+$$S_t^{reale} = S_t \cdot \frac{CPI_{2019}}{CPI_t}$$
+
+dove $S_t$ è la spesa nominale dell'anno $t$ e $CPI_t$ la media annua dell'indice dei prezzi al consumo. In questo modo la serie misura la spesa in termini di potere d'acquisto: gli 11,7 miliardi di dollari spesi nel 2025, per esempio, corrispondono a 9,3 miliardi di dollari del 2019. Nell'analisi del capitolo 4 la serie è utilizzata in logaritmi: la trasformazione rende le variazioni interpretabili in termini percentuali e tratta gli shock come variazioni proporzionali del livello della spesa, coerentemente con l'impostazione adottata da @hand2002 per le presenze nelle sale del Regno Unito.
+
+```{r estratto-dataset, echo=FALSE}
+estratto <- dati[dati$anno <= 1963 | dati$anno >= 2021,
+                 c("anno", "valore", "cpi", "reale_cpi", "prezzo_bea")]
+kable(estratto, digits = 2, booktabs = TRUE, row.names = FALSE,
+      format.args = list(decimal.mark = ","),
+      col.names = c("Anno", "Spesa nominale", "CPI-U", "Spesa reale", "Prezzo biglietti"),
+      caption = "Estratto del dataset annuale (prime e ultime cinque osservazioni). Spesa in miliardi di dollari correnti e del 2019; CPI-U: 1982-1984 = 100; prezzo dei biglietti: 2017 = 100.") %>%
+  kable_styling(latex_options = "hold_position")
+```
+
 
 ## Rappresentazione grafica delle serie storiche
 
-Nella costruzione del dataset, tutte le variabili, Box Office USA, ricavi di Netflix e spesa per consumi ricreativi (PCE), sono state convertite nei rispettivi logaritmi naturali ($\ln\_BOX$, $\ln\_NFLX$, $\ln\_PCE$): l'ampiezza delle oscillazioni o della stagionalità cresce all'aumentare del livello della serie, a causa della struttura moltiplicativa, il logaritmo dunque, serve per convertire le relazioni moltiplicative in additive e stabilizzare la varianza condizionata. Inoltre, le grandezze caratterizzate da un tasso di crescita costante (come i ricavi Netflix in questo caso) seguono dinamiche esponenziali; applicando il logaritmo, la traiettoria esponenziale diventa lineare. Inoltre, sebbene le tre grandezze siano state tutte armonizzate in milioni di dollari a livello trimestrale, i loro ordini di grandezza assoluti restano inevitabilmente molto distanti: la spesa aggregata di tutte le famiglie americane per il tempo libero supera i 120 miliardi a trimestre, mentre il Box Office e il fatturato di Netflix si collocano nell'ordine di pochi miliardi. Tracciare i valori assoluti su un unico grafico comprimerebbe le curve dei singoli mercati verso il basso, rendendole illeggibili.Per risolvere questo problema visivo, ciascuna serie è stata riscalata calcolando un numero indice a base fissa, ponendo il valore del primo trimestre del 2015 pari a 100 ($I_t = \frac{Y_t}{Y_1} \times 100$). In questo modo tutte e tre le linee partono esattamente dallo stesso punto di origine, permettendo di confrontare visivamente la velocità di crescita e le reazioni agli shock esterni.
+I grafici di questo paragrafo descrivono le serie utilizzate. La spesa per l'ingresso nelle sale è rappresentata a prezzi costanti e in livelli, in modo da rendere immediata la lettura dei valori in miliardi di dollari; la trasformazione logaritmica, descritta nel paragrafo precedente, verrà applicata nell'analisi del capitolo 4. Il confronto con gli incassi al botteghino è condotto in dollari correnti, poiché le due serie sono espresse nella stessa unità di misura e possono essere rappresentate senza ulteriori trasformazioni. Gli indici dei prezzi, che hanno basi diverse (1982–1984 = 100 per il CPI-U e 2017 = 100 per l'indice del BEA), sono invece riscalati ponendo pari a 100 il valore del 2019, in modo che le due curve si incontrino nell'ultimo anno precedente l'evento e sia possibile confrontarne la crescita.
 
-```{r echo=FALSE, fig.cap= "dataset trimestrale: Ricavi Netflix, Box Office, PCE"}
-library(readxl)
-library(dplyr)
-library(stringr)
-library(lubridate)
-library(fredr)
+```{r spesa-reale echo=FALSE, fig.cap= "Spesa per l'ingresso nelle sale cinematografiche a prezzi costanti, 1959-2025 (miliardi di dollari del 2019)."}
 
-# ============================================
-# 1. CARICAMENTO FILE
-# ============================================
-box_raw  <- read_excel("C:/Users/hp/OneDrive/Documenti/Box-Office trimestrali USA.xlsx")
+plot(dati$anno, dati$reale_cpi, type = "l", lwd = 2, col = "blue", xlab = "Anno",
+     ylab = "Miliardi di dollari del 2019")
+abline(v = 2020, lty = 2)
+```
+La Figura \@ref(fig:spesa-reale) mostra l'andamento della spesa a prezzi costanti. Prima del 2020 la serie non segue una tendenza stabile, ma attraversa fasi di durata e direzione diverse. Dopo una lieve flessione nei primi anni Sessanta, la spesa cresce fino a circa 10,9 miliardi nel 1971; nel decennio successivo oscilla e diminuisce fino al minimo di 7,65 miliardi del 1981, con il calo più marcato nel 1980, anno caratterizzato da un'inflazione del 13,5% e da una recessione. Dopo una fase di sostanziale stabilità, dalla fine degli anni Ottanta la spesa cresce, con una breve interruzione all'inizio degli anni Novanta, fino ai primi anni Duemila; tra il 2003 e il 2019 oscilla tra circa 12,7 e 14,8 miliardi, valore massimo raggiunto nel 2016. Nel 2020 la spesa crolla a 3,3 miliardi; negli anni successivi recupera fino a 9,9 miliardi nel 2023, per poi diminuire lievemente fino a 9,3 miliardi nel 2025, un livello inferiore del 32% a quello del 2019. L'assenza di una tendenza stabile e l'alternarsi di fasi di diversa durata sono coerenti con una dinamica nella quale il livello della serie si sposta nel tempo, ipotesi alla base del modello a livello locale descritto nel capitolo 2; la verifica formale verrà condotta nel capitolo 4.
 
-# 👇 AGGIORNATO: ora contiene il fatturato Netflix del solo segmento UCAN
-#    (United States & Canada), non più il fatturato globale — coerente
-#    con la copertura geografica del Box Office (USA + Canada)
-nflx_raw <- read_excel("C:/Users/hp/OneDrive/Documenti/Revenues_Netflix (Quarterly).xlsx")
+```{r bea-bom, echo=FALSE, fig.cap="Spesa per l'ingresso nelle sale (BEA) e incassi al botteghino (Box Office Mojo), 1982-2025 (miliardi di dollari correnti)."}
 
-# ============================================
-# 2. PULIZIA BOX OFFICE + CONVERSIONE IN MILIONI
-# ============================================
-box_clean <- box_raw %>%
-  filter(!is.na(ANNO) & ANNO != "") %>%
-  mutate(
-    Cumulative_Gross = `Cumulative Gross` %>%
-      str_trim() %>%
-      str_remove_all("[\\$,\\s]") %>%
-      na_if("-") %>%
-      na_if("") %>%
-      as.numeric(),
-    BOX_millions = Cumulative_Gross / 1e6        # 👈 conversione in milioni
-  ) %>%
-  select(TRIMESTRI, ANNO, BOX_millions) %>%
-  rename(Trimestre = TRIMESTRI, Anno = ANNO)
+matplot(dati$anno, cbind(dati$valore, dati$bom), type = "l", lty = 1, lwd = 2,
+        col = c("black", "darkorange"), xlim = c(1982, 2025),
+        xlab = "Anno", ylab = "Miliardi di dollari correnti")
+abline(v = 2020, lty = 2)
+legend("topleft", c("Spesa per l'ingresso (BEA)", "Incassi (Box Office Mojo)"),
+       col = c("black", "darkorange"), lty = 1, lwd = 2, bty = "n")
+```
+La Figura \@ref(fig:bea-bom) confronta, a partire dal 1982, la spesa rilevata dal BEA con gli incassi al botteghino riportati da Box Office Mojo. Le due serie seguono lo stesso andamento di fondo: crescono insieme fino al 2019, presentano flessioni in larga parte negli stessi anni (1985, 2005, 2011, 2017 e 2019) e crollano entrambe nel 2020. La spesa rilevata dal BEA è tuttavia sistematicamente superiore agli incassi, e la distanza tra le due serie si amplia dopo il 2020, quando la spesa recupera più degli incassi. Le due grandezze, del resto, non coincidono per costruzione: il BEA stima la spesa delle famiglie statunitensi a partire dai ricavi delle sale, mentre Box Office Mojo somma gli incassi dei film proiettati negli Stati Uniti e in Canada. Il confronto quantitativo tra le due serie è riportato nel paragrafo 3.3.
 
-# ============================================
-# 3. PULIZIA NETFLIX (SEGMENTO UCAN) + CONVERSIONE IN MILIONI
-# ============================================
-nflx_clean <- nflx_raw %>%
-  filter(!is.na(Anno) & Anno != "") %>%
-  mutate(
-    Revenues_num = Revenues %>%
-      str_trim() %>%
-      str_remove_all("[\\$\\s]") %>%
-      str_remove_all("\\.") %>%
-      na_if("") %>%
-      as.numeric(),
-    NFLX_millions = Revenues_num / 1e3        # 👈 conversione in milioni (dato UCAN)
-  ) %>%
-  select(Trimestre, Anno, NFLX_millions)
+```{r prezzi, echo=FALSE, fig.cap="Indice dei prezzi degli ingressi al cinema (BEA) e indice dei prezzi al consumo (CPI-U), 1959-2025 (2019 = 100)."}
 
-# ============================================
-# 4. DOWNLOAD PCE DA FRED + CONVERSIONE IN MILIONI
-# ============================================
-fredr_set_key("62ef95f7d9d2948a35e82321e1098a3b")
-
-pce_raw <- fredr(
-  series_id = "DRCARC1Q027SBEA",
-  observation_start = as.Date("2015-01-01"),
-  observation_end = as.Date("2026-09-02"),
-  frequency = "q"
-)
-
-pce_clean <- pce_raw %>%
-  mutate(
-    Anno = year(date),
-    Trimestre = paste0("Q", quarter(date)),
-    PCE_millions = value /4 * 1000   
-  )%>%
-  select(Trimestre, Anno, PCE_millions)
-
-# ============================================
-# 5. MERGE + COVID DUMMY + LOG DI TUTTO
-# ============================================
-dataset_finale <- box_clean %>%
-  full_join(nflx_clean, by = c("Trimestre", "Anno")) %>%
-  full_join(pce_clean,  by = c("Trimestre", "Anno")) %>%
-  mutate(
-    Quarter = paste0(Anno, "-", Trimestre),
-    
-    # ---- COVID DUMMY: tutto il 2020 ----
-    Covid_Dummy = if_else(
-      Anno == 2020 | (Anno == 2021 & Trimestre == "Q1"),1,0
-      ),   
-    
-    # ---- LOG NATURALE DI TUTTE LE SERIE (in milioni) ----
-    ln_BOX  = log(BOX_millions),
-    ln_NFLX = log(NFLX_millions),   # <- ora è ln(ricavi UCAN)
-    ln_PCE  = log(PCE_millions)
-  ) %>%
-  select(Quarter, Anno, Trimestre,
-         BOX_millions, NFLX_millions, PCE_millions,
-         ln_BOX, ln_NFLX, ln_PCE,
-         Covid_Dummy) %>%
-  arrange(Anno, Trimestre)  %>%
-slice(1:(n() - 2)) 
-
-# ============================================
-# 6. INDICIZZAZIONE A BASE 100 (primo trimestre = 100)
-# ============================================
-dataset_finale <- dataset_finale %>%
-  mutate(
-    idx_BOX  = BOX_millions  / first(BOX_millions,  na_rm = TRUE) * 100,
-    idx_NFLX = NFLX_millions / first(NFLX_millions, na_rm = TRUE) * 100,
-    idx_PCE  = PCE_millions  / first(PCE_millions,  na_rm = TRUE) * 100
-  )
-
-library(ggplot2)
-
-labels_x <- ifelse(grepl("Q1", dataset_finale$Quarter),
-                   dataset_finale$Quarter,
-                   gsub("\\d{4}-", "", dataset_finale$Quarter))
-
-ggplot(dataset_finale, aes(x = Quarter)) +
-  geom_line(aes(y = idx_BOX,  group = 1, color = "Box Office"), linewidth = 0.8) +
-  geom_line(aes(y = idx_NFLX, group = 1, color = "Netflix (UCAN)"), linewidth = 0.8) +
-  geom_line(aes(y = idx_PCE,  group = 1, color = "PCE"),        linewidth = 0.8) +
-  scale_x_discrete(labels = labels_x) +
-  scale_y_continuous(
-    breaks = seq(0, 1000, by = 25),
-    minor_breaks = seq(0, 1000, by = 12.5)
-  ) +
-  scale_color_manual(values = c("Box Office" = "#E74C3C",
-                                "Netflix (UCAN)" = "#2ECC71",
-                                "PCE"        = "#3498DB")) +
-  labs(
-    title = "Serie storiche trimestrali indicizzate (Base: 2015-Q1 = 100)",
-    x     = "",
-    y     = "Indice (2015-Q1 = 100)",
-    color = "Serie"
-  ) +
-  theme_minimal() +
-  theme(
-    axis.text.x  = element_text(angle = 90, hjust = 1, vjust = 0.5, size = 6),
-    axis.text.y  = element_text(size = 8),
-    panel.grid.minor = element_line(color = "grey90", linewidth = 0.3),
-    legend.position  = "bottom"
-  )
-
+ind <- function(x) 100 * x / x[dati$anno == 2019]
+matplot(dati$anno, cbind(ind(dati$cpi), ind(dati$prezzo_bea)),
+        type = "l", lty = 1, lwd = 2, col = c("blue", "red"),
+        xlab = "Anno", ylab = "Indice dei prezzi (2019 = 100)")
+abline(v = 2020, lty = 2)
+legend("topleft", c("Prezzi al consumo (CPI-U)", "Prezzi dei biglietti (BEA)"),
+       col = c("blue", "red"), lty = 1, lwd = 2, bty = "n")
 
 ```
-Il grafico mostra l'evoluzione comparata dei tre mercati dal primo trimestre del 2015 al secondo trimestre del 2026:
+La Figura \@ref(fig:prezzi) confronta l'indice dei prezzi degli ingressi al cinema con l'indice dei prezzi al consumo, entrambi riscalati ponendo pari a 100 il valore del 2019 ($I_t = \frac{P_t}{P_{2019}} \times 100$). Tra il 1959 e il 2019 il prezzo dei biglietti è aumentato di 14,2 volte, a fronte di un aumento di 8,8 volte dei prezzi al consumo: rispetto agli altri beni e servizi, l'ingresso al cinema è diventato più caro di circa il 60%. La differenza si è formata soprattutto negli anni Sessanta e tra la metà degli anni Ottanta e il 2017, mentre negli anni Settanta l'inflazione generale è cresciuta più rapidamente del prezzo dei biglietti. Dopo il 2019 i due indici crescono in misura quasi identica, intorno al 26%.
 
-I ricavi di Netflix (linea verde) mostrano una crescita continua ed eccezionale. Partendo da quota 100 nel 2015, la curva sale quasi senza sosta fino a sfiorare quota 550 nel 2026, a testimonianza di un fatturato che in undici anni si è moltiplicato per più di cinque volte. Si nota un'accelerazione decisa tra il 2018 e il 2021, una breve fase di stabilizzazione nel corso del 2022 dovuta alla saturazione del segmento di mercato causato dalla stabilizzazione di nuovi competitor e una vigorosa ripresa successiva spinta dai nuovi piani con pubblicità e dalle restrizioni sulla condivisione degli account.
-
-Il Box Office nordamericano (linea rossa) invece, presenta una dinamica nettamente divisa in due fasi distinte. Nel periodo pre-pandemico (2015–2019) la serie oscilla stabilmente attorno a valori compresi tra 100 e 135, evidenziando una forte e regolare stagionalità, con il trimestre natalizio (Q4) come picco stagionale più marcato, un picco secondario nel cuore dell'estate (Q3, stagione dei blockbuster), e i trimestri primaverili (Q1-Q2) sistematicamente sotto la media, con Q2 il più debole dell'anno. Nel secondo trimestre del 2020 la curva crolla quasi a zero a causa della chiusura forzata dei cinema. A partire dalla seconda metà del 2021 inizia una ripresa graduale che ripristina l'andamento stagionale nonostante il Box Office post-pandemia fatica a ritrovare stabilmente i livelli storici pre-Covid.
-
-La spesa ricreativa aggregata PCE (linea blu) funge da riferimento per l'intero contesto macroeconomico. La curva mostra una crescita lenta, costante e regolare, passando da 100 a oltre 175. Durante il 2020 si osserva una flessione evidente ma contenuta (fino a circa quota 75), seguita da un rapido ritorno al trend di crescita strutturale.
-
-Il confronto congiunto delle tre traiettorie evidenzia chiaramente il fenomeno al centro della ricerca: mentre la dinamica economica del paese statunitense nel suo complesso è cresciuta con costanza e lo streaming ha registrato un'espansione straordinaria, le sale cinematografiche hanno subito uno shock asimmetrico da cui sono riemerse con un volume d'affari ridimensionato rispetto al decennio precedente.
+La scelta del deflatore non è quindi neutrale. La spesa deflazionata con l'indice dei prezzi al consumo dipende sia dal numero di ingressi sia dal prezzo relativo del biglietto, e misura le risorse che le famiglie destinano al cinema in termini di potere d'acquisto; la spesa deflazionata con il prezzo dei biglietti si avvicina invece a una misura della quantità, cioè del numero di ingressi. Tra il 1959 e il 2019 la prima cresce del 49%, mentre la seconda diminuisce del 7,8%. Poiché l'oggetto dell'analisi è il box office, cioè un valore, nel seguito si utilizza l'indice dei prezzi al consumo. Nel periodo 2019–2025 la scelta è di fatto irrilevante, dato che i due indici crescono quasi allo stesso modo; la diversa tendenza di lungo periodo può però influire sulla stima dello scenario controfattuale, e per questo nel capitolo 4 l'analisi verrà ripetuta utilizzando il prezzo dei biglietti come deflatore.
 
 ## Tabella descrittiva del dataset
 
 
-```{r echo=FALSE}
-library(dplyr)
-library(moments)
-library(knitr)
-library(kableExtra)
-
-# ============================================
-# TABELLA DESCRITTIVA - solo variabili logaritmiche
-# ============================================
-
-vars_log <- dataset_finale %>%
-  select(ln_BOX, ln_NFLX, ln_PCE)     # 👈 verifica questi nomi!
-
-desc_stats_log <- data.frame(
-  Variabile = c("ln(Box Office)", "ln(Netflix)", "ln(PCE)"),
-  Media     = sapply(vars_log, mean, na.rm = TRUE),
-  Dev.Std.  = sapply(vars_log, sd, na.rm = TRUE),
-  Min       = sapply(vars_log, min, na.rm = TRUE),
-  Max       = sapply(vars_log, max, na.rm = TRUE),
-  Skewness  = sapply(vars_log, skewness, na.rm = TRUE),
-  Kurtosis  = sapply(vars_log, kurtosis, na.rm = TRUE),
-  row.names = NULL
-)
-
-kable(desc_stats_log, digits = 3, align = "c",
-      caption = "Statistiche descrittive delle serie in logaritmi") %>%
-  kable_styling(latex_options = c("hold_position", "striped"),
-                full_width = FALSE)
+```{r statistiche echo=FALSE}
+x <- dati$reale_cpi
+var_annua <- 100 * (x[-1] / x[-length(x)] - 1)
+anni  <- dati$anno[-1]
+prima <- dati$anno >= 1960 & dati$anno <= 2019
+dopo  <- dati$anno >= 2020
+stat  <- function(v) round(c(Media = mean(v), "Dev. std." = sd(v), Min = min(v), Max = max(v)), 2)
+tab_stat <- rbind("Spesa reale 1960-2019"        = stat(dati$reale_cpi[prima]),
+                  "Spesa reale 2020-2025"        = stat(dati$reale_cpi[dopo]),
+                  "Variazione annua % 1960-2019" = stat(var_annua[anni <= 2019]),
+                  "Variazione annua % 2020-2025" = stat(var_annua[anni >= 2020]))
+kable(tab_stat, booktabs = TRUE, format.args = list(decimal.mark = ","),
+      caption = "Statistiche descrittive della spesa reale, in miliardi di dollari del 2019, e delle sue variazioni annue percentuali") %>%
+  kable_styling(latex_options = c("hold_position", "striped"))
 ```
 
-$\ln(\text{Box Office})$:La serie mostra una media pari a 7,447 e la variabilità più elevata dell'intero campione, con una deviazione standard di 1,132. L'intervallo tra il valore minimo (1,553, registrato nel secondo trimestre del 2020 durante il lockdown integrale) e il valore massimo (8,116) riflette la gravità dello shock pandemico subito dalle sale cinematografiche. Questo evento eccezionale influisce pesantemente sulla forma della distribuzione: fortemente asimmetrica a sinistra ($\text{Skewness} = -3{,}687$) e con una curtosi elevata ($\text{Kurtosis} = 17{,}914$) viene evidenziata la presenza di una pesante coda sinistra causata dai trimestri di chiusura forzata. Tale anomalia distributiva giustifica formalmente l'introduzione della variabile d'intervento ($Covid\_Dummy$) nei modelli econometrici, necessaria per evitare che i residui risultino gravemente non normali. I ricavi Netflix nel segmento UCAN presentano un valore medio di 7,877, con un minimo di 6,892 registrato nel primo trimestre del 2015 (avvio della serie) e un massimo di 8,600 nel secondo trimestre del 2026 (ultima osservazione disponibile). La deviazione standard, pari a 0,503, riflette il trend di crescita sostenuto e pressoché ininterrotto della piattaforma nell'intero periodo campionario. L'asimmetria è moderata (Skewness = −0,480) e la curtosi risulta inferiore a quella gaussiana (Kurtosis = 2,110): a differenza del Box Office, la serie non mostra code pesanti riconducibili allo shock pandemico, poiché il mercato UCAN di Netflix ha continuato a crescere anche durante il 2020, beneficiando dell'aumento della domanda di intrattenimento domestico durante il lockdown. La spesa aggregata per servizi ricreativi funge da benchmark macroeconomico e presenta la massima stabilità campionaria, con una deviazione standard di appena 0,195 attorno a una media di 11,949. L'indice di asimmetria pressoché nullo ($\text{Skewness} = 0{,}027$) e la curtosi pari a 2,273 indicano una distribuzione simmetrica e regolare, confermando come i consumi complessivi per il tempo libero abbiano seguito una traiettoria macroeconomica fluida, assorbendo rapidamente la flessione registrata nel 2020.
+La Tabella \@ref(tab:statistiche) riporta le principali statistiche descrittive della spesa a prezzi costanti e delle sue variazioni annue, distinguendo il periodo precedente l'evento da quello di valutazione. Tra il 1960 e il 2019 la spesa ha un valore medio di 10,85 miliardi di dollari del 2019, con una deviazione standard di 2,21 miliardi, e varia tra il minimo di 7,65 miliardi del 1981 e il massimo di 14,79 miliardi del 2016. Nel periodo 2020–2025 il valore medio scende a 7,72 miliardi, prossimo al minimo dei sessant'anni precedenti, e anche il valore più elevato, 9,87 miliardi nel 2023, resta inferiore alla media del periodo 1960–2019.
 
-```{r echo=FALSE}
-library(dplyr)
-library(kableExtra)
+Le variazioni annue confermano l'eccezionalità dell'evento. Tra il 1960 e il 2019 la spesa reale cresce in media dello 0,85% l'anno, con una deviazione standard di 6,16 punti percentuali e variazioni comprese tra il −19,58% del 1980 e il +12,29% del 1989; nel periodo 2020–2025 la deviazione standard sale a 53,02 punti, per effetto del calo del 76% registrato nel 2020 e della successiva ripresa. La media delle variazioni annue di questo periodo, pari a +9,90%, non va letta come una crescita della spesa: deriva dai forti aumenti percentuali del 2021 e del 2022, calcolati su livelli molto bassi, mentre nel 2025 la spesa resta inferiore del 31,9% a quella del 2019.
 
-cor_matrix <- data.frame(
-  dln_BOX  = diff(dataset_finale$ln_BOX),
-  dln_NFLX = diff(dataset_finale$ln_NFLX),
-  dln_PCE  = diff(dataset_finale$ln_PCE)
-) %>%
-  cor() %>%
-  round(3)
-
-kable(cor_matrix, caption = "Matrice di correlazione tra i tassi di crescita trimestrali (serie differenziate)",
-      booktabs = TRUE) %>%
-  kable_styling(latex_options = c("hold_position", "striped"), font_size = 9)
+```{r confronto echo=FALSE}
+k <- dati$anno >= 1982 & dati$anno <= 2019
+r <- dati$valore / dati$bom
+var19 <- function(x) 100 * (x[dati$anno %in% c(2020, 2025)] / x[dati$anno == 2019] - 1)
+tab_conf <- c(mean(r[k]), min(r[k]), max(r[k]), r[dati$anno %in% c(2019, 2025)],
+              cor(diff(log(dati$reale_cpi[k])), diff(log(dati$bom_reale[k]))),
+              var19(dati$reale_cpi), var19(dati$bom_reale))
+names(tab_conf) <- c("Rapporto spesa/incassi: media 1982-2019",
+                     "Rapporto spesa/incassi: minimo 1982-2019",
+                     "Rapporto spesa/incassi: massimo 1982-2019",
+                     "Rapporto spesa/incassi: 2019",
+                     "Rapporto spesa/incassi: 2025",
+                     "Correlazione delle variazioni annue reali, 1983-2019",
+                     "Spesa BEA: variazione reale 2019-2020 (%)",
+                     "Spesa BEA: variazione reale 2019-2025 (%)",
+                     "Box Office Mojo: variazione reale 2019-2020 (%)",
+                     "Box Office Mojo: variazione reale 2019-2025 (%)")
+kable(tab_conf, digits = 2, col.names = "Valore", booktabs = TRUE,
+      format.args = list(decimal.mark = ","),
+      caption = "Confronto tra la spesa per l'ingresso nelle sale (BEA) e gli incassi al botteghino (Box Office Mojo)") %>%
+  kable_styling(latex_options = c("hold_position", "striped"))
 ```
-La matrice di correlazione sui tassi di crescita evidenzia un legame estremamente forte tra Box Office e PCE (ρ = 0,961), mentre le correlazioni di Netflix con le altre due serie risultano trascurabili (ρ = −0,056 con il Box Office, ρ = −0,044 con il PCE). La correlazione Box Office-PCE va però interpretata con cautela: con un campione di 46 osservazioni differenziate, un singolo shock condiviso di ampiezza eccezionale come il crollo del secondo trimestre 2020 — comune a entrambe le serie — può da solo determinare gran parte della correlazione lineare stimata. Una verifica di robustezza (es. escludendo il trimestre 2020‑Q2) sarebbe opportuna prima di attribuire questo risultato a un legame strutturale di lungo periodo piuttosto che a un artefatto legato allo shock pandemico.
+La Tabella \@ref(tab:confronto) quantifica il confronto tra la spesa rilevata dal BEA e gli incassi riportati da Box Office Mojo. Tra il 1982 e il 2019 la spesa è sistematicamente superiore agli incassi, in media del 12%, con un rapporto compreso tra 1,03 nel 1987 e 1,22 nel 2014. Nonostante la differenza di livello, le due serie presentano la stessa dinamica: le variazioni annue reali hanno un coefficiente di correlazione pari a 0,72 nel periodo 1983–2019. Dopo il 2019 il rapporto si amplia, passando da 1,20 nel 2019 a 1,35 nel 2025: in termini reali la spesa diminuisce del 76,0% nel 2020 e del 31,9% tra il 2019 e il 2025, mentre gli incassi diminuiscono rispettivamente dell'81,6% e del 39,5%. La spesa rilevata dal BEA costituisce quindi una misura adeguata della dinamica del box office nel periodo precedente l'evento, sul quale viene stimato il modello. Dopo il 2020, tuttavia, registra una perdita inferiore a quella degli incassi: l'effetto stimato nel capitolo 4 sulla spesa è pertanto verosimilmente inferiore a quello che si otterrebbe considerando gli incassi al botteghino.
 
 ## Analisi preliminare della stagionalità e dell'autocorrelazione
 
-```{r echo=FALSE, fig.cap="Decomposizione STL della serie ln(Box Office): trend, stagionalità e componente residua", fig.width=7, fig.height=6}
-library(ggplot2)
 
-decomp_Box <- stl(ts_ln_BOX, s.window = "periodic")
-decomp_df <- as.data.frame(decomp_Box$time.series) %>%
-  mutate(Quarter = dataset_finale$Quarter) %>%
-  tidyr::pivot_longer(cols = c(seasonal, trend, remainder), names_to = "componente", values_to = "valore")
+Poiché i dati hanno frequenza annuale, la serie non presenta una componente stagionale: il valore di ciascun anno comprende la spesa di tutti i mesi, sia dei periodi di maggiore affluenza, come le festività natalizie e la stagione estiva, sia di quelli di minore affluenza. L'analisi preliminare si concentra quindi sulle variazioni annue della spesa reale e sulla loro autocorrelazione, che descrivono la dinamica della serie prima del 2020, ossia l'informazione su cui viene stimato il modello controfattuale del capitolo 4.
 
-ggplot(decomp_df, aes(x = Quarter, y = valore, group = 1)) +
-  geom_line(color = "#2C3E50") +
-  facet_wrap(~componente, ncol = 1, scales = "free_y") +
-  scale_x_discrete(labels = labels_x) +
-  labs(title = "Decomposizione STL di ln(Box Office)", x = "", y = "") +
-  theme_minimal() +
-  theme(axis.text.x = element_text(angle = 90, size = 6))
+```{r variazioni, echo=FALSE, fig.cap="Variazione annua della spesa reale per l'ingresso nelle sale, in percentuale, 1960-2025"}
+plot(anni, var_annua, type = "h", lwd = 3, col = "blue",
+     xlab = "Anno", ylab = "Variazione rispetto all'anno prima (%)")
+abline(h = 0)
 ```
-La decomposizione STL della serie ln(Box Office) isola con chiarezza le tre componenti sottostanti. Il trend (pannello inferiore) evidenzia il crollo strutturale del 2020, toccando il minimo di 4,428 nel terzo trimestre — corrispondente a un Box Office di fondo di circa 84 milioni di dollari, contro una media di periodo di 1.712 milioni: una riduzione a meno di un ventesimo del livello tipico — seguito da un recupero che si stabilizza su un livello permanentemente inferiore a quello pre-pandemico. La componente stagionale (pannello centrale) mostra un pattern regolare e costante nel tempo, con ampiezza complessiva di 0,315 in log tra il trimestre più forte e quello più debole: il quarto trimestre registra il picco stagionale più marcato (+0,132, coerente con le uscite natalizie), seguito da un picco secondario nel terzo trimestre (+0,092, stagione estiva dei blockbuster), mentre il primo e soprattutto il secondo trimestre (−0,183, il più debole dell'anno) si collocano sistematicamente sotto la media. Il remainder (pannello superiore) conferma visivamente quanto già emerso dalla Tabella 3.2: oscilla in un intervallo contenuto per la quasi totalità del campione (mediana pressoché nulla, −0,015), ad eccezione di un'anomalia isolata di ampiezza eccezionale nel secondo trimestre del 2020 (−3,207) — un valore che nessuna combinazione di trend e stagionalità ordinaria può spiegare, a conferma diretta della necessità di modellare esplicitamente lo shock pandemico tramite la variabile Covid_Dummy nei capitoli successivi.
 
-### Analisi preliminare dell'ACF e PACF delle serie storiche logaritmiche 
+La Figura \@ref(fig:variazioni) riporta la variazione percentuale della spesa reale rispetto all'anno precedente. Tra il 1960 e il 2019 le variazioni oscillano attorno a una media dello 0,85% e sono comprese tra il −19,58% del 1980 e il +12,29% del 1989 (Tabella \@ref(tab:statistiche)). Il calo del 2020, pari al 76,05%, è quasi quattro volte più ampio della peggiore riduzione del periodo precedente. Gli aumenti degli anni successivi, pari al 77,15% nel 2021, al 52,23% nel 2022 e al 12,39% nel 2023, partono da livelli molto bassi e non riportano la spesa ai valori precedenti l'evento: partendo dal livello del 2020, per tornare a quello del 2019 sarebbe stato necessario un aumento del 317,49%. Nel 2024 e nel 2025 le variazioni tornano negative, pari rispettivamente al −5,03% e al −1,29%: la ripresa si interrompe e nel 2025 la spesa resta inferiore del 31,95% a quella del 2019.
 
-```{r echo=FALSE, fig.cap="ACF e PACF della serie logaritmica del Box Office trimestrale"}
-par(mfrow=c(1,2), mar = c(3,3,3,3))
-acf(dataset_finale$ln_BOX,lag.max = 16, na.action = na.pass, main = "ACF ln(Box Office)")
-pacf(dataset_finale$ln_BOX, lag.max = 16, na.action = na.pass, main = "PACF ln(Box Office)")
+### Funzioni di autocorrelazione e di autocorrelazione parziale
 
+Per descrivere la persistenza della serie, la Figura \@ref(fig:acf-pacf) riporta la funzione di autocorrelazione (ACF) e la funzione di autocorrelazione parziale (PACF) del logaritmo della spesa reale e delle sue variazioni annue, calcolate sul periodo 1960–2019. Gli anni successivi sono esclusi perché il calo del 2020 e la ripresa che segue dominerebbero le stime, che devono invece descrivere la dinamica della serie in assenza dell'evento.
+
+```{r acf-pacf, echo=FALSE, fig.cap="ACF e PACF del logaritmo della spesa reale (in alto) e delle sue variazioni annue (in basso), 1960-2019", fig.height=6}
+ln_pre <- log(dati$reale_cpi[prima])
+v_pre  <- var_annua[anni <= 2019]
+par(mfrow = c(2, 2))
+acf(ln_pre,  main = "ACF del logaritmo")
+pacf(ln_pre, main = "PACF del logaritmo")
+acf(v_pre,   main = "ACF delle variazioni annue")
+pacf(v_pre,  main = "PACF delle variazioni annue")
 ```
-L'ACF della serie ln(Box Office) decade rapidamente: dal valore unitario a lag 0 scende a 0,555 al primo ritardo, 0,378 al secondo e 0,248 al terzo, rientrando già entro la soglia di significatività (±0,289) dal quarto ritardo in poi (0,063). La PACF conferma questa lettura: un unico spike marcatamente significativo al primo ritardo (0,555), seguito da valori trascurabili e statisticamente non significativi a tutti i ritardi successivi (il massimo, al lag 4, è −0,146, ben entro la banda). Questa configurazione — decadimento geometrico rapido dell'ACF accompagnato da una singola barra nella PACF — è la firma tipica di un processo AR(1) con coefficiente autoregressivo moderato (φ ≈ 0,56). Resta comunque compatibile anche con un processo integrato I(1). 
 
-```{r echo=FALSE, fig.cap="ACF e PACF serie logaritmica ricavi trimestrali Netflix UCAN"}
-par(mfrow=c(1,2))
-acf(dataset_finale$ln_NFLX,lag.max = 16, na.action = na.pass, main = "ACF ln(Netflix)")
-pacf(dataset_finale$ln_NFLX, lag.max = 16, na.action = na.pass, main = "PACF ln(Netflix)")
-```
-La serie ln(Netflix) mostra un comportamento nettamente diverso: l'ACF decade in modo molto più lento, restando sopra la soglia di significatività fino al decimo ritardo incluso (0,318) — corrispondente a due anni e mezzo di persistenza statisticamente rilevabile, un ordine di grandezza superiore rispetto al Box Office. La PACF presenta, come per il Box Office, un unico spike dominante al primo ritardo, ma di ampiezza molto maggiore (0,930 contro 0,555), con tutti i ritardi successivi non significativi (massimo assoluto 0,065, al lag 3). Il coefficiente autoregressivo implicito, prossimo all'unità (φ ≈ 0,93), è coerente con un processo fortemente persistente, al limite della non stazionarietà — un'evidenza preliminare che rafforza il sospetto, già discusso in precedenza, di una possibile radice unitaria o di una rottura strutturale nel profilo di crescita della piattaforma.
+Nel pannello superiore della Figura \@ref(fig:acf-pacf), l'ACF del logaritmo della spesa decresce in modo lento e quasi lineare: resta al di fuori della banda di significatività al 5%, pari a ±0,253 con 60 osservazioni, fino all'undicesimo ritardo (0,280). La PACF presenta invece un unico valore significativo, pari a 0,934 al primo ritardo, mentre tutti i ritardi successivi restano all'interno della banda. La serie è quindi fortemente persistente e la sua dipendenza dal passato passa interamente attraverso il valore dell'anno precedente; un coefficiente così prossimo all'unità è compatibile con la presenza di una radice unitaria.
 
-```{r echo=FALSE, fig.cap= "ACF e PACF serie trimestrale PCE"}
-par(mfrow=c(1,2))
-acf(dataset_finale$ln_PCE,lag.max = 16, na.action = na.pass, main = "ACF ln(PCE)")
-pacf(dataset_finale$ln_PCE, lag.max = 16, na.action = na.pass, main = "PACF ln(PCE)")
+Nel pannello inferiore, le variazioni annue non mostrano autocorrelazione significativa: tutti i valori dell'ACF e della PACF restano all'interno della banda. I valori più ampi in valore assoluto si osservano al secondo ritardo, pari a −0,238 per l'ACF e a −0,250 per la PACF, vicini alla soglia ma non significativi; con diciassette ritardi esaminati, valori isolati prossimi alla soglia sono del resto attesi anche in assenza di autocorrelazione. La variazione registrata in un anno non aiuta quindi a prevedere quelle degli anni successivi: le variazioni si comportano approssimativamente come shock casuali attorno a una crescita media modesta, pari allo 0,85% annuo (Tabella \@ref(tab:statistiche)).
 
-```
-La serie ln(PCE) presenta un pattern intermedio tra le due precedenti: l'ACF decade in modo lento e monotono, mantenendosi sopra la soglia di significatività fino all'ottavo ritardo (0,301), per poi rientrare stabilmente entro la banda di confidenza dal nono ritardo in avanti. La PACF conferma ancora una volta la struttura AR(1): spike dominante al primo ritardo (0,883) e valori trascurabili e non significativi a tutti i ritardi successivi (massimo assoluto 0,052). Il coefficiente autoregressivo implicito (φ ≈ 0,88) indica una persistenza elevata, coerente con la natura tipicamente non stazionaria delle serie macroeconomiche aggregate di reddito e consumo.
-La verifica formale riguardo l'identificazione degli ordini di integrazione delle tre serie storiche verrà proposta nel capitolo successivo.
-
-
-
+Nel complesso, prima del 2020 la serie si comporta approssimativamente come una passeggiata aleatoria: il livello di ciascun anno è pari a quello dell'anno precedente, più una variazione non prevedibile. Ne derivano due indicazioni per l'analisi del capitolo 4. In primo luogo, il punto di partenza più informativo per costruire il controfattuale del 2020 è il livello raggiunto nel 2019, pari a 13,60 miliardi di dollari del 2019, e non la media del periodo 1960–2019, pari a 10,85 miliardi: il modello strutturale adottato rappresenta infatti il livello della serie come una componente che evolve nel tempo secondo una passeggiata aleatoria. In secondo luogo, l'assenza di autocorrelazione nelle variazioni annue, insieme all'assenza di stagionalità, non suggerisce l'introduzione di componenti aggiuntive, autoregressive o stagionali, per descrivere la dinamica della serie prima dell'evento.
